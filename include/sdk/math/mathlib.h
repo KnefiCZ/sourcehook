@@ -316,4 +316,79 @@ inline int Ceil2Int(float a)
 	return RetVal;
 }
 
+inline void RGBtoHSV(const Vector &rgb, Vector &hsv)
+{
+	float flMax = max(rgb.x, rgb.y);
+	flMax = max(flMax, rgb.z);
+	float flMin = min(rgb.x, rgb.y);
+	flMin = min(flMin, rgb.z);
+	
+	hsv.z = flMax;
+	
+	if (flMax != 0.0F)
+	{
+		hsv.y = (flMax - flMin) / flMax;
+	}
+	else
+	{
+		hsv.y = 0.0F;
+	}
+
+	if (hsv.y == 0.0F)
+	{
+		hsv.x = -1.0f;
+	}
+	else
+	{
+		float32 d = flMax - flMin;
+		if (rgb.x == flMax)
+		{
+			hsv.x = (rgb.y - rgb.z) / d;
+		}
+		else if (rgb.y == flMax)
+		{
+			hsv.x = 2.0F + (rgb.z - rgb.x) / d;
+		}
+		else
+		{
+			hsv.x = 4.0F + (rgb.x - rgb.y) / d;
+		}
+		hsv.x *= 60.0F;
+		if (hsv.x < 0.0F)
+		{
+			hsv.x += 360.0F;
+		}
+	}
+}
+
+inline void HSVtoRGB(const Vector &hsv, Vector &rgb)
+{
+	if (hsv.y == 0.0F)
+	{
+		rgb.Init(hsv.z, hsv.z, hsv.z);
+		return;
+	}
+
+	float32 hue = hsv.x;
+	if (hue == 360.0F)
+	{
+		hue = 0.0F;
+	}
+	hue /= 60.0F;
+	int     i = hue;
+	float32 f = hue - i;
+	float32 p = hsv.z * (1.0F - hsv.y);
+	float32 q = hsv.z * (1.0F - hsv.y * f);
+	float32 t = hsv.z * (1.0F - hsv.y * (1.0F - f));
+	switch (i)
+	{
+	case 0: rgb.Init(hsv.z, t, p); break;
+	case 1: rgb.Init(q, hsv.z, p); break;
+	case 2: rgb.Init(p, hsv.z, t); break;
+	case 3: rgb.Init(p, q, hsv.z); break;
+	case 4: rgb.Init(t, p, hsv.z); break;
+	case 5: rgb.Init(hsv.z, p, q); break;
+	}
+}
+
 #endif

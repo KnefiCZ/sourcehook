@@ -42,6 +42,9 @@ public:
 	{
 		return (x*x + y * y + z * z);
 	}
+
+	vec_t Length2D(void) const;
+	vec_t Length2DSqr(void) const;
 	
 	FORCEINLINE bool WithinAABox(Vector const &boxmin, Vector const &boxmax);
 	vec_t DistTo(const Vector &vOther) const;
@@ -266,6 +269,16 @@ inline vec_t VectorLength(const Vector& v)
 inline vec_t Vector::Length(void) const
 {
 	return VectorLength(*this);
+}
+
+inline vec_t Vector::Length2D(void) const
+{
+	return sqrt(x*x + y * y);
+}
+
+inline vec_t Vector::Length2DSqr(void) const
+{
+	return (x*x + y * y);
 }
 
 bool Vector::WithinAABox(Vector const &boxmin, Vector const &boxmax)
