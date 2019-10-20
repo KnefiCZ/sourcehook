@@ -47,5 +47,14 @@
     <ClInclude Include="include\sdk\interfaces\iappsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\sdk\interfaces\ivengineclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\interfaces\ibaseclientdll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\interfaces\ienginetrace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

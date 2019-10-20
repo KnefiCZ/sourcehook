@@ -82,6 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -105,6 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -133,9 +135,12 @@
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h" />
     <ClInclude Include="include\sdk\interfaces\iappsystem.h" />
+    <ClInclude Include="include\sdk\interfaces\ibaseclientdll.h" />
     <ClInclude Include="include\sdk\interfaces\ibaseinterface.h" />
+    <ClInclude Include="include\sdk\interfaces\ienginetrace.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannel.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannelinfo.h" />
+    <ClInclude Include="include\sdk\interfaces\ivengineclient.h" />
     <ClInclude Include="include\sdk\math\mathlib.h" />
     <ClInclude Include="include\sdk\math\vector.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />

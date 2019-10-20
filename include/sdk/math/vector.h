@@ -73,11 +73,36 @@ public:
 	Vector operator/(float fl) const;
 };
 
-// Normalization
-// FIXME: Can't use quite yet
-//vec_t VectorNormalize( Vector& v );
+class __declspec(align(16)) VectorAligned : public Vector
+{
+public:
+	inline VectorAligned(void) {};
+	inline VectorAligned(float X, float Y, float Z)
+	{
+		Init(X, Y, Z);
+	}
 
-// Length
+public:
+	explicit VectorAligned(const Vector &vOther)
+	{
+		Init(vOther.x, vOther.y, vOther.z);
+	}
+
+	VectorAligned& operator=(const Vector &vOther)
+	{
+		Init(vOther.x, vOther.y, vOther.z);
+		return *this;
+	}
+
+	VectorAligned& operator=(const VectorAligned &vOther)
+	{
+		Init(vOther.x, vOther.y, vOther.z);
+		return *this;
+	}
+
+	float w;
+};
+
 inline vec_t VectorLength(const Vector& v);
 
 // Dot Product

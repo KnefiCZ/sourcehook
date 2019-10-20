@@ -435,12 +435,8 @@ FORCEINLINE unsigned int bf_read::ReadUBitLong(int numbits)
 	unsigned int iWordOffset2 = iLastBit >> 5;
 	m_iCurBit += numbits;
 
-#if __i386__
-	unsigned int bitmask = (2 << (numbits - 1)) - 1;
-#else
 	extern unsigned long g_ExtraMasks[33];
 	unsigned int bitmask = g_ExtraMasks[numbits];
-#endif
 
 	unsigned int dw1 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset1) >> iStartBit;
 	unsigned int dw2 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset2) << (32 - iStartBit);
