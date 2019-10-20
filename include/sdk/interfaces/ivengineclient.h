@@ -2,8 +2,10 @@
 #define SDK_IVENGINECLIENT_H
 #pragma once
 
+#include "../interfaceinfo.h"
 #include "../common.h"
 
+class INetChannelInfo;
 class VMatrix;
 
 typedef struct player_info_s
@@ -22,43 +24,50 @@ typedef struct player_info_s
 class IVEngineClient
 {
 public:
-	int GetLocalPlayer()
+	void GetScreenSize(int& width, int& height)
 	{
-		typedef int(__thiscall* GetLocalPlayerFn)(void*);
-		return CallVFunction<GetLocalPlayerFn>(this, 12)(this);
+		return CallVFunction<void(__thiscall*)(void*, int&, int&)>(this, IVENGINECLIENT_INDEX_GETSCREENSIZE)(this, width, height);
 	}
 
 	bool GetPlayerInfo(int ent_num, player_info_t *pinfo)
 	{
-		typedef bool(__thiscall* GetPlayerInfoFn)(void*, int, player_info_t*);
-		return CallVFunction<GetPlayerInfoFn>(this, 8)(this, ent_num, pinfo);
+		return CallVFunction<bool(__thiscall*)(void*, int, player_info_t*)>(this, IVENGINECLIENT_INDEX_GETPLAYERINFO)(this, ent_num, pinfo);
+	}
+
+	int GetLocalPlayer()
+	{
+		return CallVFunction<int(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_GETLOCALPLAYER)(this);
 	}
 
 	int GetMaxClients()
 	{
-		typedef int(__thiscall* GetMaxClientsFn)(void*);
-		return CallVFunction<GetMaxClientsFn>(this, 21)(this);
+		return CallVFunction<int(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_GETMAXCLIENTS)(this);
 	}
 
 	bool IsInGame()
 	{
-		typedef bool(__thiscall* IsInGameFn)(void*);
-		return CallVFunction<IsInGameFn>(this, 26)(this);
+		return CallVFunction<bool(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_ISINGAME)(this);
+	}
+
+	bool IsConnected()
+	{
+		return CallVFunction<bool(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_ISCONNECTED)(this);
 	}
 
 	bool IsDrawingLoadingImage()
 	{
-		typedef bool(__thiscall* IsDrawingLoadingImageFn)(void*);
-		return CallVFunction<IsDrawingLoadingImageFn>(this, 28)(this);
+		return CallVFunction<bool(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_ISDRAWINGLOADINGIMAGE)(this);
 	}
 
 	const VMatrix& WorldToScreenMatrix()
 	{
-		typedef const VMatrix&(__thiscall* WorldToScreenMatrixFn)(void*);
-		return CallVFunction<WorldToScreenMatrixFn>(this, 37)(this);
+		return CallVFunction<const VMatrix&(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_WORLDTOSCREENMATRIX)(this);
+	}
+
+	INetChannelInfo* GetNetChannelInfo()
+	{
+		return CallVFunction<INetChannelInfo*(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_GETNETCHANNELINFO)(this);
 	}
 };
-
-#define IVENGINECLIENT_INTERFACE "IVEngineClient0013"
 
 #endif

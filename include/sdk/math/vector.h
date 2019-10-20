@@ -3,9 +3,6 @@
 #pragma once
 
 #include <math.h>
-#include <float.h>
-#include <stdlib.h>
-#include <xmmintrin.h>
 #include "../common.h"
 
 #define X_INDEX	0
@@ -102,14 +99,6 @@ public:
 
 	float w;
 };
-
-inline vec_t VectorLength(const Vector& v);
-
-// Dot Product
-FORCEINLINE vec_t DotProduct(const Vector& a, const Vector& b);
-
-// Cross product
-void CrossProduct(const Vector& a, const Vector& b, Vector& result);
 
 inline Vector::Vector(vec_t X, vec_t Y, vec_t Z)
 {
