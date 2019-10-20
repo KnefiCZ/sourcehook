@@ -48,6 +48,22 @@ struct matrix3x4_t
 	float m_flMatVal[3][4];
 };
 
+class VMatrix
+{
+public:
+	inline float* operator[](int i)
+	{
+		return m[i];
+	}
+
+	inline const float* operator[](int i) const
+	{
+		return m[i];
+	}
+public:
+	vec_t m[4][4];
+};
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846
 #endif

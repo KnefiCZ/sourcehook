@@ -4,6 +4,8 @@
 
 #include "../common.h"
 
+class VMatrix;
+
 typedef struct player_info_s
 {
 	char			name[32];
@@ -48,6 +50,12 @@ public:
 	{
 		typedef bool(__thiscall* IsDrawingLoadingImageFn)(void*);
 		return CallVFunction<IsDrawingLoadingImageFn>(this, 28)(this);
+	}
+
+	const VMatrix& WorldToScreenMatrix()
+	{
+		typedef const VMatrix&(__thiscall* WorldToScreenMatrixFn)(void*);
+		return CallVFunction<WorldToScreenMatrixFn>(this, 37)(this);
 	}
 };
 
