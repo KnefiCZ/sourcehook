@@ -50,6 +50,8 @@ inline FuncType CallVFunction(void* ppClass, DWORD index) {
 #define  DLL_CLASS_IMPORT			__declspec( dllimport )
 #define  DLL_GLOBAL_IMPORT   extern __declspec( dllimport )
 
+#define ALIGN(x) __declspec(align(x))
+
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #define MAX_PLAYER_NAME_LENGTH		32

@@ -71,9 +71,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin</OutDir>
+    <IntDir>build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin</OutDir>
+    <IntDir>build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -131,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\sdk\math\mathlib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h" />
@@ -143,9 +146,13 @@
     <ClInclude Include="include\sdk\interfaces\ivengineclient.h" />
     <ClInclude Include="include\sdk\interfaceinfo.h" />
     <ClInclude Include="include\sdk\math\mathlib.h" />
+    <ClInclude Include="include\sdk\math\math_pfns.h" />
+    <ClInclude Include="include\sdk\math\qangle.h" />
     <ClInclude Include="include\sdk\math\vector.h" />
+    <ClInclude Include="include\sdk\math\vector2d.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />
     <ClInclude Include="include\sdk\util\swap.h" />
+    <ClInclude Include="include\sdk\util\trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

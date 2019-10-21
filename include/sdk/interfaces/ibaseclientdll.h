@@ -3,6 +3,7 @@
 #pragma once
 
 #include "../common.h"
+#include "../interfaceinfo.h"
 
 class ClientClass;
 
@@ -30,11 +31,8 @@ class IBaseClientDLL
 {
 	virtual ClientClass* GetAllClasses()
 	{
-		typedef ClientClass*(__thiscall* GetAllClassesFn)(void*);
-		return CallVFunction<GetAllClassesFn>(this, 8)(this);
+		return CallVFunction<ClientClass*(__thiscall*)(void*)>(this, IBASECLIENTDLL_INDEX_GETALLCLASSES)(this);
 	}
 };
-
-#define IBASECLIENTDLL_INTERFACE "VClient017"
 
 #endif
