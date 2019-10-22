@@ -2,8 +2,6 @@
 #define SDK_VECTOR_H
 #pragma once
 
-#include "math_pfns.h"
-
 class Vector
 {
 public:

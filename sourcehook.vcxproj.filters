@@ -18,7 +18,10 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\sdk\math\mathlib.cpp">
+    <ClCompile Include="src\sdk\sourcemath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sdk\bitbuf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,9 +42,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\util\bitbuf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\sdk\util\swap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\interfaces\ibaseinterface.h">
@@ -72,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\math\math_pfns.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\util\bitbytes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

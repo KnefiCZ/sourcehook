@@ -46,11 +46,11 @@ inline FuncType CallVFunction(void* ppClass, DWORD index) {
 #define SINGLE_INHERITANCE		__single_inheritance
 #define MULTIPLE_INHERITANCE	__multiple_inheritance
 
-#define  DLL_IMPORT   extern "C"	__declspec( dllimport )
-#define  DLL_CLASS_IMPORT			__declspec( dllimport )
-#define  DLL_GLOBAL_IMPORT   extern __declspec( dllimport )
+#define  DLL_IMPORT   extern "C" __declspec( dllimport )
+#define  DLL_CLASS_IMPORT __declspec( dllimport )
+#define  DLL_GLOBAL_IMPORT extern __declspec( dllimport )
 
-#define ALIGN(x) __declspec(align(x))
+#define ALIGN(x) __declspec( align(x) )
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -61,50 +61,20 @@ inline FuncType CallVFunction(void* ppClass, DWORD index) {
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-inline unsigned long& FloatBits(vec_t& f)
-{
-	return *reinterpret_cast<unsigned long*>(&f);
-}
+#define	COORD_INTEGER_BITS			14
+#define COORD_FRACTIONAL_BITS		5
+#define COORD_DENOMINATOR			(1<<(COORD_FRACTIONAL_BITS))
+#define COORD_RESOLUTION			(1.0/(COORD_DENOMINATOR))
 
-inline unsigned long const& FloatBits(vec_t const& f)
-{
-	return *reinterpret_cast<unsigned long const*>(&f);
-}
+// Special threshold for networking multiplayer origins
+#define COORD_INTEGER_BITS_MP		11
+#define COORD_FRACTIONAL_BITS_MP_LOWPRECISION 3
+#define COORD_DENOMINATOR_LOWPRECISION			(1<<(COORD_FRACTIONAL_BITS_MP_LOWPRECISION))
+#define COORD_RESOLUTION_LOWPRECISION			(1.0/(COORD_DENOMINATOR_LOWPRECISION))
 
-inline vec_t BitsToFloat(unsigned long i)
-{
-	return *reinterpret_cast<vec_t*>(&i);
-}
-
-inline bool IsFinite(vec_t f)
-{
-	return ((FloatBits(f) & 0x7F800000) != 0x7F800000);
-}
-
-inline unsigned long FloatAbsBits(vec_t f)
-{
-	return FloatBits(f) & 0x7FFFFFFF;
-}
-
-inline float FloatMakeNegative(vec_t f)
-{
-	return BitsToFloat(FloatBits(f) | 0x80000000);
-}
-
-inline float FloatMakePositive(vec_t f)
-{
-	return (float)fabs(f);
-}
-
-inline float FloatNegate(vec_t f)
-{
-	return BitsToFloat(FloatBits(f) ^ 0x80000000);
-}
-
-inline bool IsPowerOfTwo(int value)
-{
-	return (value & (value - 1)) == 0;
-}
+#define NORMAL_FRACTIONAL_BITS		11
+#define NORMAL_DENOMINATOR			( (1<<(NORMAL_FRACTIONAL_BITS)) - 1 )
+#define NORMAL_RESOLUTION			(1.0/(NORMAL_DENOMINATOR))
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 

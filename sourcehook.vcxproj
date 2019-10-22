@@ -133,7 +133,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\sdk\math\mathlib.cpp" />
+    <ClCompile Include="src\sdk\bitbuf.cpp" />
+    <ClCompile Include="src\sdk\sourcemath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h" />
@@ -151,7 +152,7 @@
     <ClInclude Include="include\sdk\math\vector.h" />
     <ClInclude Include="include\sdk\math\vector2d.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />
-    <ClInclude Include="include\sdk\util\swap.h" />
+    <ClInclude Include="include\sdk\util\bitbytes.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
