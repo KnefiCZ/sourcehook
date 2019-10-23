@@ -70,11 +70,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)bin</OutDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)bin</OutDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -136,7 +136,8 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\sdk\bitbuf.cpp" />
-    <ClCompile Include="src\sdk\sourcemath.cpp" />
+    <ClCompile Include="src\sdk\hash.cpp" />
+    <ClCompile Include="src\sdk\mathlib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h" />
@@ -154,6 +155,8 @@
     <ClInclude Include="include\sdk\math\vector.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />
     <ClInclude Include="include\sdk\util\bitbytes.h" />
+    <ClInclude Include="include\sdk\util\crc.h" />
+    <ClInclude Include="include\sdk\util\md5.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

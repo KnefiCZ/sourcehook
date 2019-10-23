@@ -84,15 +84,6 @@ float FastCos(float x)
 	return (c1 + x2 * (c2 + c3 * x2));
 }
 
-void VectorNormalize(Vector& vec)
-{
-	float iradius = 1.f / (FastSqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z) + FLT_EPSILON);
-
-	vec.x *= iradius;
-	vec.y *= iradius;
-	vec.z *= iradius;
-}
-
 
 /*==============================================================================*/
 //	Mathlib																		*/

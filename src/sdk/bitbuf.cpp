@@ -34,9 +34,9 @@ static int64 ZigZagDecode64(uint64 n)
 	return(n >> 1) ^ -static_cast<int64>(n & 1);
 }
 
-unsigned long g_LittleBits[32];
-unsigned long g_BitWriteMasks[32][33];
-unsigned long g_ExtraMasks[33];
+static unsigned long g_LittleBits[32];
+static unsigned long g_BitWriteMasks[32][33];
+static unsigned long g_ExtraMasks[33];
 
 class CBitWriteMasksInit
 {
@@ -65,8 +65,8 @@ public:
 
 static CBitWriteMasksInit g_BitWriteMasksInit;
 
-const int kMaxVarintBytes = 10;
-const int kMaxVarint32Bytes = 5;
+static const int kMaxVarintBytes = 10;
+static const int kMaxVarint32Bytes = 5;
 
 /*==============================================================================*/
 //	bf_write
@@ -195,12 +195,12 @@ bool bf_write::WriteBits(const void *pInData, int nBits)
 {
 	unsigned char *pOut = (unsigned char*)pInData;
 	int nBitsLeft = nBits;
-	
+
 	if ((m_iCurBit + nBits) > m_nDataBits)
 	{
 		return false;
 	}
-	
+
 	while (((unsigned long)pOut & 3) != 0 && nBitsLeft >= 8)
 	{
 
@@ -219,7 +219,7 @@ bool bf_write::WriteBits(const void *pInData, int nBits)
 		nBitsLeft -= numbits;
 		m_iCurBit += numbits;
 	}
-	
+
 	if (nBitsLeft >= 32)
 	{
 		unsigned long iBitsRight = (m_iCurBit & 31);
@@ -228,7 +228,7 @@ bool bf_write::WriteBits(const void *pInData, int nBits)
 		unsigned long bitMaskRight = g_BitWriteMasks[0][iBitsRight];
 
 		unsigned long *pData = &m_pData[m_iCurBit >> 5];
-		
+
 		while (nBitsLeft >= 32)
 		{
 			unsigned long curData = *(unsigned long*)pOut;
@@ -250,7 +250,7 @@ bool bf_write::WriteBits(const void *pInData, int nBits)
 			m_iCurBit += 32;
 		}
 	}
-	
+
 	while (nBitsLeft >= 8)
 	{
 		WriteUBitLong(*pOut, 8, false);
@@ -391,7 +391,7 @@ void bf_write::WriteBitCoord(const float f)
 			intval--;
 			WriteUBitLong((unsigned int)intval, COORD_INTEGER_BITS);
 		}
-		
+
 		if (fractval)
 		{
 			WriteUBitLong((unsigned int)fractval, COORD_FRACTIONAL_BITS);
@@ -454,7 +454,7 @@ void bf_write::WriteBitVec3Normal(const Vector& fa)
 		WriteBitNormal(fa[0]);
 	if (yflag)
 		WriteBitNormal(fa[1]);
-	
+
 	int	signbit = (fa[2] <= -NORMAL_RESOLUTION);
 	WriteOneBit(signbit);
 }
@@ -680,7 +680,7 @@ unsigned int bf_read::PeekUBitLong(int numbits)
 	for (i = 0; i < numbits; i++)
 	{
 		nBitValue = ReadOneBit();
-		
+
 		if (nBitValue)
 		{
 			r |= GetBitForBitnum(i);
@@ -741,7 +741,7 @@ unsigned int bf_read::ReadBitLong(int numbits, bool bSigned)
 float bf_read::ReadBitCoord(void)
 {
 	int intval = 0;
-	int fractval = 0; 
+	int fractval = 0;
 	int signbit = 0;
 	float value = 0.0;
 
@@ -784,7 +784,7 @@ float bf_read::ReadBitNormal(void)
 	unsigned int fractval = ReadUBitLong(NORMAL_FRACTIONAL_BITS);
 
 	float value = (float)fractval * NORMAL_RESOLUTION;
-	
+
 	if (signbit)
 		value = -value;
 
@@ -796,7 +796,7 @@ void bf_read::ReadBitVec3Coord(Vector& fa)
 	int xflag;
 	int yflag;
 	int zflag;
-	
+
 	fa.Init(0, 0, 0);
 
 	xflag = ReadOneBit();
@@ -825,7 +825,7 @@ void bf_read::ReadBitVec3Normal(Vector& fa)
 		fa[1] = ReadBitNormal();
 	else
 		fa[1] = 0.0f;
-	
+
 	int znegative = ReadOneBit();
 
 	float fafafbfb = fa[0] * fa[0] + fa[1] * fa[1];
@@ -846,12 +846,12 @@ void bf_read::ReadBitAngles(QAngle& fa)
 }
 
 int	bf_read::ReadChar()
-{ 
+{
 	return (char)ReadUBitLong(8);
 }
 
 int	bf_read::ReadByte()
-{ 
+{
 	return ReadUBitLong(8);
 }
 
@@ -861,7 +861,7 @@ int	bf_read::ReadShort()
 }
 
 int	bf_read::ReadWord()
-{ 
+{
 	return ReadUBitLong(16);
 }
 
@@ -874,7 +874,7 @@ float bf_read::ReadFloat()
 {
 	float ret;
 	ReadBits(&ret, 32);
-	
+
 	LittleFloat(&ret, &ret);
 	return ret;
 }
@@ -908,7 +908,7 @@ bool bf_read::ReadString(char *pStr, int maxLen, bool bLine, int *pOutNumChars)
 			bTooSmall = true;
 		}
 	}
-	
+
 	pStr[iChar] = 0;
 
 	if (pOutNumChars)
@@ -925,7 +925,7 @@ char* bf_read::ReadAndAllocateString(bool *pOverflow)
 	bool bOverflow = !ReadString(str, sizeof(str), false, &nChars);
 	if (pOverflow)
 		*pOverflow = bOverflow;
-	
+
 	char *pRet = new char[nChars + 1];
 	for (int i = 0; i <= nChars; i++)
 		pRet[i] = str[i];

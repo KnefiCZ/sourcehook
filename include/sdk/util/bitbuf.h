@@ -7,10 +7,6 @@
 class Vector;
 class QAngle;
 
-extern unsigned long g_LittleBits[32];
-extern unsigned long g_BitWriteMasks[32][33];
-extern unsigned long g_ExtraMasks[33];
-
 class bf_write
 {
 public:
@@ -38,13 +34,9 @@ public:
 	void WriteUBitVar(unsigned int data);
 
 	void WriteVarInt32(uint32 data);
-	//void WriteVarInt64(uint64 data);
 	void WriteSignedVarInt32(int32 data);
-	//void WriteSignedVarInt64(int64 data);
 	int ByteSizeVarInt32(uint32 data);
-	//int ByteSizeVarInt64(uint64 data);
 	int ByteSizeSignedVarInt32(int32 data);
-	//int ByteSizeSignedVarInt64(int64 data);
 
 	bool WriteBitsFromBuffer(class bf_read *pIn, int nBits);
 	
@@ -60,7 +52,6 @@ public:
 	void WriteShort(int val);
 	void WriteWord(int val);
 	void WriteLong(long val);
-	//void WriteLongLong(int64 val);
 	void WriteFloat(float val);
 	bool WriteBytes(const void *pBuf, int nBytes);
 
@@ -80,6 +71,7 @@ public:
 	int m_nDataBits;
 	int m_iCurBit;
 };
+
 
 class bf_read
 {
@@ -102,29 +94,22 @@ public:
 	int ReadSBitLong(int numbits);
 	
 	uint32 ReadVarInt32();
-	//uint64 ReadVarInt64();
 	int32 ReadSignedVarInt32();
-	//int64 ReadSignedVarInt64();
 
 	unsigned int ReadBitLong(int numbits, bool bSigned);
 
 	float ReadBitCoord();
-	//float ReadBitCoordMP(bool bIntegral, bool bLowPrecision);
 	float ReadBitFloat();
 	float ReadBitNormal();
 	void ReadBitVec3Coord(Vector& fa);
 	void ReadBitVec3Normal(Vector& fa);
 	void ReadBitAngles(QAngle& fa);
 
-	//unsigned int ReadBitCoordBits();
-	//unsigned int ReadBitCoordMPBits(bool bIntegral, bool bLowPrecision);
-
 	int	ReadChar();
 	int	ReadByte();
 	int	ReadShort();
 	int	ReadWord();
 	long ReadLong();
-	//int64 ReadLongLong();
 	float ReadFloat();
 	bool ReadBytes(void *pOut, int nBytes);
 
