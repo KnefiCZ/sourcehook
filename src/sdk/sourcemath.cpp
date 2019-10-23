@@ -3,10 +3,12 @@
 #include <math.h>
 #include <xmmintrin.h>
 
+#include "sdk/util/bitbytes.h"
+
 #include "sdk/math/math_pfns.h"
 #include "sdk/math/mathlib.h"
+
 #include "sdk/math/vector.h"
-#include "sdk/math/vector2d.h"
 #include "sdk/math/qangle.h"
 /*==============================================================================*/
 
@@ -32,391 +34,280 @@ float FastRSqrt(float x)
 	return (0.5f * rroot) * (3.f - (x * rroot) * rroot);
 }
 
-void FastSinCos(float x, float* s, float* c)
+void FastSinCos(float angle, float* sin, float* cos)
 {
-	float t4, t8, t12;
+	angle = angle - floorf(angle * M_INV_TWO_PI) * M_TWO_PI;
+	float sinmultiplier = (angle > 0.f && angle < M_PI) ? 1.f : -1.f;
+	angle = angle > 0.f ? angle : -angle;
 
-	__asm
+	if (angle < M_HALF_PI)
 	{
-		movss	xmm0, x
-		movss	t12, xmm0
-		movss	xmm1, _ps_am_inv_sign_mask
-		mov		eax, t12
-		mulss	xmm0, _ps_am_2_o_pi
-		andps	xmm0, xmm1
-		and		eax, 0x80000000
-
-		cvttss2si	edx, xmm0
-		mov		ecx, edx
-		mov		t12, esi
-		mov		esi, edx
-		add		edx, 0x1
-		shl		ecx, (31 - 1)
-		shl		edx, (31 - 1)
-
-		movss	xmm4, _ps_am_1
-		cvtsi2ss	xmm3, esi
-		mov		t8, eax
-		and		esi, 0x1
-
-		subss	xmm0, xmm3
-		movss	xmm3, _sincos_inv_masks[esi * 4]
-		minss	xmm0, xmm4
-
-		subss	xmm4, xmm0
-
-		movss	xmm6, xmm4
-		andps	xmm4, xmm3
-		and		ecx, 0x80000000
-		movss	xmm2, xmm3
-		andnps	xmm3, xmm0
-		and		edx, 0x80000000
-		movss	xmm7, t8
-		andps	xmm0, xmm2
-		mov		t8, ecx
-		mov		t4, edx
-		orps	xmm4, xmm3
-
-		mov		eax, s
-		mov		edx, c
-
-		andnps	xmm2, xmm6
-		orps	xmm0, xmm2
-
-		movss	xmm2, t8
-		movss	xmm1, xmm0
-		movss	xmm5, xmm4
-		xorps	xmm7, xmm2
-		movss	xmm3, _ps_sincos_p3
-		mulss	xmm0, xmm0
-		mulss	xmm4, xmm4
-		movss	xmm2, xmm0
-		movss	xmm6, xmm4
-		orps	xmm1, xmm7
-		movss	xmm7, _ps_sincos_p2
-		mulss	xmm0, xmm3
-		mulss	xmm4, xmm3
-		movss	xmm3, _ps_sincos_p1
-		addss	xmm0, xmm7
-		addss	xmm4, xmm7
-		movss	xmm7, _ps_sincos_p0
-		mulss	xmm0, xmm2
-		mulss	xmm4, xmm6
-		addss	xmm0, xmm3
-		addss	xmm4, xmm3
-		movss	xmm3, t4
-		mulss	xmm0, xmm2
-		mulss	xmm4, xmm6
-		orps	xmm5, xmm3
-		mov		esi, t12
-		addss	xmm0, xmm7
-		addss	xmm4, xmm7
-		mulss	xmm0, xmm1
-		mulss	xmm4, xmm5
-		
-		movss[eax], xmm0
-		movss[edx], xmm4
+		*cos = FastCos(angle);
+		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
+		return;
 	}
+
+	if (angle < M_PI)
+	{
+		*cos = -FastCos(M_PI - angle);
+		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
+		return;
+	}
+
+	if (angle < M_THREE_HALF_PI)
+	{
+		*cos = -FastCos(angle - M_PI);
+		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
+		return;
+	}
+
+	*cos = FastCos(M_TWO_PI - angle);
+	*sin = sinmultiplier * FastSqrt(1.f - *cos * *cos);
+
+	return;
+}
+
+float FastSin(float x)
+{
+	return FastCos(M_HALF_PI - x);
 }
 
 float FastCos(float x)
 {
-	float temp;
+	static float c1 = 0.99940307f;
+	static float c2 = -0.49558072f;
+	static float c3 = 0.03679168f;
+	float x2;
 
-	__asm
-	{
-		movss	xmm0, x
-		movss	xmm1, _ps_am_inv_sign_mask
-		andps	xmm0, xmm1
-		addss	xmm0, _ps_am_pi_o_2
-		mulss	xmm0, _ps_am_2_o_pi
+	x2 = x * x;
 
-		cvttss2si	ecx, xmm0
-		movss	xmm5, _ps_am_1
-		mov		edx, ecx
-		shl		edx, (31 - 1)
-		cvtsi2ss	xmm1, ecx
-		and		edx, 0x80000000
-		and ecx, 0x1
-
-		subss	xmm0, xmm1
-		movss	xmm6, _sincos_masks[ecx * 4]
-		minss	xmm0, xmm5
-
-		movss	xmm1, _ps_sincos_p3
-		subss	xmm5, xmm0
-
-		andps	xmm5, xmm6
-		movss	xmm7, _ps_sincos_p2
-		andnps	xmm6, xmm0
-		mov		temp, edx
-		orps	xmm5, xmm6
-		movss	xmm0, xmm5
-
-		mulss	xmm5, xmm5
-		movss	xmm4, _ps_sincos_p1
-		movss	xmm2, xmm5
-		mulss	xmm5, xmm1
-		movss	xmm1, _ps_sincos_p0
-		addss	xmm5, xmm7
-		mulss	xmm5, xmm2
-		movss	xmm3, temp
-		addss	xmm5, xmm4
-		mulss	xmm5, xmm2
-		orps	xmm0, xmm3
-		addss	xmm5, xmm1
-		mulss	xmm0, xmm5
-
-		movss   x, xmm0
-
-	}
+	return (c1 + x2 * (c2 + c3 * x2));
 }
+
+void VectorNormalize(Vector& vec)
+{
+	float iradius = 1.f / (FastSqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z) + FLT_EPSILON);
+
+	vec.x *= iradius;
+	vec.y *= iradius;
+	vec.z *= iradius;
+}
+
 
 /*==============================================================================*/
 //	Mathlib																		*/
 /*==============================================================================*/
-
-
-
-
-/*==============================================================================*/
-//	Vector2D
-/*==============================================================================*/
-Vector2D::Vector2D(void)
+vec_t DotProduct(const vec_t *v1, const vec_t *v2)
 {
+	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
-Vector2D::Vector2D(vec_t X, vec_t Y)
+vec_t DotProduct(const Vector& a, const Vector& b)
 {
-	x = X; y = Y;
+	return(a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-void Vector2D::Init(vec_t ix, vec_t iy)
+vec_t DotProduct(const Vector& a, const vec_t *b)
 {
-	x = ix; y = iy;
+	return(a.x * b[0] + a.y * b[1] + a.z * b[2]);
 }
 
-vec_t Vector2D::operator[](int i) const
+vec_t VectorLength(const Vector& v)
 {
-	return ((vec_t*)this)[i];
+	return FastSqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-vec_t& Vector2D::operator[](int i)
+void VectorNormalize(Vector& vec)
 {
-	return ((vec_t*)this)[i];
+	float iradius = 1.f / (FastSqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z) + FLT_EPSILON);
+
+	vec.x *= iradius;
+	vec.y *= iradius;
+	vec.z *= iradius;
 }
 
-bool Vector2D::operator==(Vector2D& src)
-{
-	return (src.x == x) && (src.y == y);
-}
-
-bool Vector2D::operator!=(Vector2D& src)
-{
-	return (src.x != x) || (src.y != y);
-}
-
-void Vector2D::Negate()
-{
-	x = -x; y = -y;
-}
-
-Vector2D& Vector2D::operator+=(const Vector2D& v)
-{
-	x += v.x;
-	y += v.y;
-
-	return *this;
-}
-
-Vector2D& Vector2D::operator-=(const Vector2D& v)
-{
-	x -= v.x;
-	y -= v.y;
-
-	return *this;
-}
-
-Vector2D& Vector2D::operator*=(float fl)
-{
-	x *= fl;
-	y *= fl;
-
-	return *this;
-}
-
-Vector2D& Vector2D::operator*=(const Vector2D& v)
-{
-	x *= v.x;
-	y *= v.y;
-
-	return *this;
-}
-
-Vector2D& Vector2D::operator/=(float fl)
-{
-	float oofl = 1.0f / fl;
-	x *= oofl;
-	y *= oofl;
-
-	return *this;
-}
-
-Vector2D& Vector2D::operator/=(const Vector2D& v)
-{
-	x /= v.x;
-	y /= v.y;
-
-	return *this;
-}
-
-vec_t Vector2D::Dot(Vector2D& vOther) const
-{
-	return DotProduct2D(*this, vOther);
-}
-
-vec_t Vector2D::LengthSqr() const
-{
-	return (x*x + y * y);
-}
-
-vec_t Vector2D::Length() const
-{
-	return Vector2DLength(*this);
-}
-
-vec_t Vector2D::DistTo(const Vector2D &vOther) const
-{
-	Vector2D delta;
-	Vector2DSubtract(*this, vOther, delta);
-
-	return delta.Length();
-}
-
-vec_t Vector2D::DistToSqr(const Vector2D &vOther) const
-{
-	Vector2D delta;
-	Vector2DSubtract(*this, vOther, delta);
-
-	return delta.LengthSqr();
-}
-
-Vector2D Vector2D::operator+(const Vector2D& v) const
-{
-	Vector2D res;
-	Vector2DAdd(*this, v, res);
-
-	return res;
-}
-
-Vector2D Vector2D::operator-(const Vector2D& v) const
-{
-	Vector2D res;
-	Vector2DSubtract(*this, v, res);
-
-	return res;
-}
-
-Vector2D Vector2D::operator*(float fl) const
-{
-	Vector2D res;
-	Vector2DMultiply(*this, fl, res);
-
-	return res;
-}
-
-Vector2D Vector2D::operator*(const Vector2D& v) const
-{
-	Vector2D res;
-	Vector2DMultiply(*this, v, res);
-
-	return res;
-}
-
-Vector2D Vector2D::operator/(float fl) const
-{
-	Vector2D res;
-	Vector2DDivide(*this, fl, res);
-
-	return res;
-}
-
-Vector2D Vector2D::operator/(const Vector2D& v) const
-{
-	Vector2D res;
-	Vector2DDivide(*this, v, res);
-
-	return res;
-}
-
-Vector2D operator*(float fl, const Vector2D& v)
-{
-	return v * fl;
-}
-
-void Vector2DCopy(Vector2D& src, Vector2D& dst)
-{
-	dst.x = src.x;
-	dst.y = src.y;
-}
-
-void Vector2DAdd(Vector2D& a, Vector2D& b, Vector2D& c)
+void VectorAdd(const Vector& a, const Vector& b, Vector& c)
 {
 	c.x = a.x + b.x;
 	c.y = a.y + b.y;
+	c.z = a.z + b.z;
 }
 
-void Vector2DSubtract(Vector2D& a, Vector2D& b, Vector2D& c)
+void VectorSubtract(const Vector& a, const Vector& b, Vector& c)
 {
 	c.x = a.x - b.x;
 	c.y = a.y - b.y;
+	c.z = a.z - b.z;
 }
 
-void Vector2DMultiply(Vector2D& a, vec_t b, Vector2D& c)
+void VectorMultiply(const Vector& a, vec_t b, Vector& c)
 {
 	c.x = a.x * b;
 	c.y = a.y * b;
+	c.z = a.z * b;
 }
 
-void Vector2DMultiply(Vector2D& a, Vector2D& b, Vector2D& c)
+void VectorMultiply(const Vector& a, const Vector& b, Vector& c)
 {
 	c.x = a.x * b.x;
 	c.y = a.y * b.y;
+	c.z = a.z * b.z;
 }
 
-void Vector2DDivide(Vector2D& a, vec_t b, Vector2D& c)
+void VectorDivide(const Vector& a, vec_t b, Vector& c)
 {
 	vec_t oob = 1.0f / b;
+
 	c.x = a.x * oob;
 	c.y = a.y * oob;
+	c.z = a.z * oob;
 }
 
-void Vector2DDivide(Vector2D& a, Vector2D& b, Vector2D& c)
+void VectorDivide(const Vector& a, const Vector& b, Vector& c)
 {
 	c.x = a.x / b.x;
 	c.y = a.y / b.y;
+	c.z = a.z / b.z;
 }
 
-void Vector2DMA(Vector2D& start, float s, Vector2D& dir, Vector2D& result)
+void CrossProduct(const Vector& a, const Vector& b, Vector& result)
 {
-	result.x = start.x + s * dir.x;
-	result.y = start.y + s * dir.y;
+	result.x = a.y*b.z - a.z*b.y;
+	result.y = a.z*b.x - a.x*b.z;
+	result.z = a.x*b.y - a.y*b.x;
 }
 
-void Vector2DLerp(Vector2D& src1, Vector2D& src2, vec_t t, Vector2D& dest)
+void VectorTransform(const Vector& in1, const matrix3x4_t& in2, Vector& out)
 {
-	dest[0] = src1[0] + (src2[0] - src1[0]) * t;
-	dest[1] = src1[1] + (src2[1] - src1[1]) * t;
+	out[0] = DotProduct(in1, in2[0]) + in2[0][3];
+	out[1] = DotProduct(in1, in2[1]) + in2[1][3];
+	out[2] = DotProduct(in1, in2[2]) + in2[2][3];
 }
 
-vec_t DotProduct2D(Vector2D& a, Vector2D& b)
+void AngleVectors(const QAngle& angles, Vector& forward)
 {
-	return( (a.x * b.x) + (a.y * b.y) );
+	float sp, sy, cp, cy;
+
+	FastSinCos(DEG2RAD(angles[0]), &sp, &cp);
+	FastSinCos(DEG2RAD(angles[1]), &sy, &cy);
+
+	forward.x = cp * cy;
+	forward.y = cp * sy;
+	forward.z = -sp;
 }
 
-vec_t Vector2DLength(Vector2D& v)
+void AngleVectors(const QAngle& angles, Vector& forward, Vector& right, Vector& up)
 {
-	return (vec_t)FastSqrt(v.x*v.x + v.y*v.y);
+	float sr, sp, sy, cr, cp, cy;
+
+	FastSinCos(DEG2RAD(angles[0]), &sp, &cp);
+	FastSinCos(DEG2RAD(angles[1]), &sy, &cy);
+	FastSinCos(DEG2RAD(angles[2]), &sr, &cr);
+
+	forward.x = cp * cy;
+	forward.y = cp * sy;
+	forward.z = -sp;
+
+	right.x = (-1 * sr*sp*cy + -1 * cr*-sy);
+	right.y = (-1 * sr*sp*sy + -1 * cr*cy);
+	right.z = -1 * sr*cp;
+
+	up.x = (cr*sp*cy + -sr * -sy);
+	up.y = (cr*sp*sy + -sr * cy);
+	up.z = cr * cp;
+}
+
+void VectorAngles(const Vector& forward, QAngle& angles)
+{
+	float	tmp, yaw, pitch;
+
+	if (forward[1] == 0 && forward[0] == 0)
+	{
+		yaw = 0;
+		if (forward[2] > 0)
+			pitch = 270;
+		else
+			pitch = 90;
+	}
+	else
+	{
+		yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
+		if (yaw < 0)
+			yaw += 360;
+
+		tmp = FastSqrt(forward[0] * forward[0] + forward[1] * forward[1]);
+		pitch = (atan2(-forward[2], tmp) * 180 / M_PI);
+		if (pitch < 0)
+			pitch += 360;
+	}
+
+	angles[0] = pitch;
+	angles[1] = yaw;
+	angles[2] = 0;
+}
+
+void ClampAngles(QAngle& angles)
+{
+	if (angles[0] > 89.0f)
+		angles[0] = 89.0f;
+	else if (angles[0] < -89.0f)
+		angles[0] = -89.0f;
+
+	if (angles[1] > 180.0f)
+		angles[1] = 180.0f;
+	else if (angles[1] < -180.0f)
+		angles[1] = -180.0f;
+
+	angles[2] = 0;
+}
+
+float GetFOV(const QAngle& viewAngle, const QAngle& aimAngle)
+{
+	Vector ang, aim;
+
+	AngleVectors(viewAngle, aim);
+	AngleVectors(aimAngle, ang);
+
+	return RAD2DEG(acos(aim.Dot(ang) / aim.LengthSqr()));
+}
+
+QAngle CalcAngle(const Vector& src, const Vector& dst)
+{
+	QAngle vAngle;
+	Vector delta((src.x - dst.x), (src.y - dst.y), (src.z - dst.z));
+	double hyp = FastSqrt(delta.x * delta.x + delta.y * delta.y);
+
+	vAngle.x = float(atanf(float(delta.z / hyp)) * 57.295779513082f);
+	vAngle.y = float(atanf(float(delta.y / delta.x)) * 57.295779513082f);
+	vAngle.z = 0.0f;
+
+	if (delta.x >= 0.0)
+		vAngle.y += 180.0f;
+
+	return vAngle;
+}
+
+
+/*==============================================================================*/
+//	matrix3x4_t
+/*==============================================================================*/
+matrix3x4_t::matrix3x4_t(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23)
+{
+	m_flMatVal[0][0] = m00;	m_flMatVal[0][1] = m01; m_flMatVal[0][2] = m02; m_flMatVal[0][3] = m03;
+	m_flMatVal[1][0] = m10;	m_flMatVal[1][1] = m11; m_flMatVal[1][2] = m12; m_flMatVal[1][3] = m13;
+	m_flMatVal[2][0] = m20;	m_flMatVal[2][1] = m21; m_flMatVal[2][2] = m22; m_flMatVal[2][3] = m23;
+}
+
+matrix3x4_t::matrix3x4_t(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin)
+{
+	Init(xAxis, yAxis, zAxis, vecOrigin);
+}
+
+void matrix3x4_t::Init(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin)
+{
+	m_flMatVal[0][0] = xAxis.x; m_flMatVal[0][1] = yAxis.x; m_flMatVal[0][2] = zAxis.x; m_flMatVal[0][3] = vecOrigin.x;
+	m_flMatVal[1][0] = xAxis.y; m_flMatVal[1][1] = yAxis.y; m_flMatVal[1][2] = zAxis.y; m_flMatVal[1][3] = vecOrigin.y;
+	m_flMatVal[2][0] = xAxis.z; m_flMatVal[2][1] = yAxis.z; m_flMatVal[2][2] = zAxis.z; m_flMatVal[2][3] = vecOrigin.z;
 }
 
 
@@ -604,13 +495,6 @@ Vector operator*(float fl, const Vector& v)
 	return v * fl;
 }
 
-void VectorCopy(Vector& src, Vector& dst)
-{
-	dst.x = src.x;
-	dst.y = src.y;
-	dst.z = src.z;
-}
-
 Vector Vector::Cross(const Vector& vOther) const
 {
 	Vector res;
@@ -627,101 +511,6 @@ vec_t Vector::Length2D(void) const
 vec_t Vector::Length2DSqr(void) const
 {
 	return (x*x + y * y);
-}
-
-void VectorAdd(Vector& a, Vector& b, Vector& c)
-{
-	c.x = a.x + b.x;
-	c.y = a.y + b.y;
-	c.z = a.z + b.z;
-}
-
-void VectorSubtract(Vector& a, Vector& b, Vector& c)
-{
-	c.x = a.x - b.x;
-	c.y = a.y - b.y;
-	c.z = a.z - b.z;
-}
-
-void VectorMultiply(Vector& a, vec_t b, Vector& c)
-{
-	c.x = a.x * b;
-	c.y = a.y * b;
-	c.z = a.z * b;
-}
-
-void VectorMultiply(Vector& a, Vector& b, Vector& c)
-{
-	c.x = a.x * b.x;
-	c.y = a.y * b.y;
-	c.z = a.z * b.z;
-}
-
-void VectorScale(Vector& in, vec_t scale, Vector& result)
-{
-	VectorMultiply(in, scale, result);
-}
-
-void VectorDivide(Vector& a, vec_t b, Vector& c)
-{
-	vec_t oob = 1.0f / b;
-	c.x = a.x * oob;
-	c.y = a.y * oob;
-	c.z = a.z * oob;
-}
-
-void VectorDivide(Vector& a, Vector& b, Vector& c)
-{
-	c.x = a.x / b.x;
-	c.y = a.y / b.y;
-	c.z = a.z / b.z;
-}
-
-void VectorLerp(Vector& src1, Vector& src2, vec_t t, Vector& dest)
-{
-	dest.x = src1.x + (src2.x - src1.x) * t;
-	dest.y = src1.y + (src2.y - src1.y) * t;
-	dest.z = src1.z + (src2.z - src1.z) * t;
-}
-
-Vector VectorLerp(Vector& src1, Vector& src2, vec_t t)
-{
-	Vector result;
-	VectorLerp(src1, src2, t, result);
-
-	return result;
-}
-
-vec_t DotProduct(Vector& a, Vector& b)
-{
-	return(a.x*b.x + a.y*b.y + a.z*b.z);
-}
-
-void CrossProduct(Vector& a, Vector& b, Vector& result)
-{
-	result.x = a.y*b.z - a.z*b.y;
-	result.y = a.z*b.x - a.x*b.z;
-	result.z = a.x*b.y - a.y*b.x;
-}
-
-vec_t DotProductAbs(Vector &v0, Vector &v1)
-{
-	return FloatMakePositive(v0.x*v1.x) + FloatMakePositive(v0.y*v1.y) + FloatMakePositive(v0.z*v1.z);
-}
-
-vec_t DotProductAbs(Vector &v0, float *v1)
-{
-	return FloatMakePositive(v0.x * v1[0]) + FloatMakePositive(v0.y * v1[1]) + FloatMakePositive(v0.z * v1[2]);
-}
-
-vec_t VectorLength(Vector& v)
-{
-	return (vec_t)FastSqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-}
-
-Vector CrossProduct(Vector& a, Vector& b)
-{
-	return Vector(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x);
 }
 
 
@@ -851,11 +640,4 @@ QAngle operator*(float fl, const QAngle& v)
 {
 	QAngle ret(v * fl);
 	return ret;
-}
-
-void AngleCopy(QAngle& src, QAngle& dst)
-{
-	dst.x = src.x;
-	dst.y = src.y;
-	dst.z = src.z;
 }

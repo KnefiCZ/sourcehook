@@ -2,6 +2,8 @@
 #define SDK_SWAP_H
 #pragma once
 
+#include "../common.h"
+
 #define WordSwap  WordSwapAsm
 #define DWordSwap DWordSwapAsm
 

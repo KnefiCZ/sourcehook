@@ -2,7 +2,7 @@
 #define SDK_COMMON_H
 #pragma once
 
-#include <windef.h>
+#include <Windows.h>
 #include <string>
 #include <stdio.h>
 #include <wtypes.h>

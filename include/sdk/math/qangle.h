@@ -2,6 +2,8 @@
 #define SDK_QANGLE_H
 #pragma once
 
+#include "../common.h"
+
 class QAngle
 {
 public:
@@ -31,7 +33,5 @@ public:
 	QAngle operator*(float fl) const;
 	QAngle operator/(float fl) const;
 };
-
-void AngleCopy(const QAngle& src, QAngle& dst);
 
 #endif

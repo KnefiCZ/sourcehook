@@ -6,8 +6,8 @@ float FastSqrt(float x);
 float FastRSqrtFast(float x);
 float FastRSqrt(float x);
 void FastSinCos(float x, float* s, float* c);
+float FastSin(float x);
 float FastCos(float x);
-
-inline float FastClampInfinity(float x) { return (x > FLT_MAX ? FLT_MAX : x); }
+float FastClampInfinity(float x);
 
 #endif

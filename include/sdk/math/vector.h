@@ -2,6 +2,8 @@
 #define SDK_VECTOR_H
 #pragma once
 
+#include "../common.h"
+
 class Vector
 {
 public:
@@ -59,20 +61,5 @@ public:
 	
 	float w;
 };
-
-void VectorCopy(const Vector& src, Vector& dst);
-void VectorAdd(const Vector& a, const Vector& b, Vector& result);
-void VectorSubtract(const Vector& a, const Vector& b, Vector& result);
-void VectorMultiply(const Vector& a, vec_t b, Vector& result);
-void VectorMultiply(const Vector& a, const Vector& b, Vector& result);
-void VectorDivide(const Vector& a, vec_t b, Vector& result);
-void VectorDivide(const Vector& a, const Vector& b, Vector& result);
-inline void VectorScale(const Vector& in, vec_t scale, Vector& result);
-//void VectorMA(const Vector& start, float scale, const Vector& direction, Vector& dest);  -archi: is this really needed ??
-inline vec_t VectorLength(const Vector& v);
-vec_t DotProduct(const Vector& a, const Vector& b);
-void CrossProduct(const Vector& a, const Vector& b, Vector& result);
-void VectorLerp(const Vector& src1, const Vector& src2, vec_t t, Vector& dest);
-Vector VectorLerp(const Vector& src1, const Vector& src2, vec_t t);
 
 #endif

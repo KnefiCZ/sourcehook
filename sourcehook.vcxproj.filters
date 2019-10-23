@@ -65,9 +65,6 @@
     <ClInclude Include="include\sdk\util\trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\sdk\math\vector2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\sdk\math\qangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
