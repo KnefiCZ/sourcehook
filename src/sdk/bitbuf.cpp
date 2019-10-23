@@ -560,5 +560,414 @@ const unsigned char* bf_write::GetData() const
 /*==============================================================================*/
 //	bf_read
 /*==============================================================================*/
+bf_read::bf_read()
+{
+	m_pData = NULL;
+	m_nDataBytes = 0;
+	m_nDataBits = -1;
+	m_iCurBit = 0;
+}
 
-/*I'm fucking tired i need to sleep bruh*/
+bf_read::bf_read(const void *pData, int nBytes, int nBits)
+{
+	StartReading(pData, nBytes, 0, nBits);
+}
+
+void bf_read::StartReading(const void *pData, int nBytes, int iStartBit, int nBits)
+{
+	m_pData = (unsigned char*)pData;
+	m_nDataBytes = nBytes;
+
+	if (nBits == -1)
+	{
+		m_nDataBits = m_nDataBytes << 3;
+	}
+	else
+	{
+		m_nDataBits = nBits;
+	}
+
+	m_iCurBit = iStartBit;
+}
+
+void bf_read::Reset()
+{
+	m_iCurBit = 0;
+}
+
+int bf_read::ReadOneBitNoCheck()
+{
+	unsigned char value = m_pData[m_iCurBit >> 3] >> (m_iCurBit & 7);
+
+	++m_iCurBit;
+	return value & 1;
+}
+
+int bf_read::ReadOneBit()
+{
+	if (GetNumBitsLeft() <= 0)
+	{
+		return 0;
+	}
+
+	return ReadOneBitNoCheck();
+}
+
+void bf_read::ReadBits(void *pOutData, int nBits)
+{
+	unsigned char *pOut = (unsigned char*)pOutData;
+	int nBitsLeft = nBits;
+
+	while (((size_t)pOut & 3) != 0 && nBitsLeft >= 8)
+	{
+		*pOut = (unsigned char)ReadUBitLong(8);
+		++pOut;
+		nBitsLeft -= 8;
+	}
+
+	while (nBitsLeft >= 32)
+	{
+		*((unsigned long*)pOut) = ReadUBitLong(32);
+		pOut += sizeof(unsigned long);
+		nBitsLeft -= 32;
+	}
+
+	while (nBitsLeft >= 8)
+	{
+		*pOut = ReadUBitLong(8);
+		++pOut;
+		nBitsLeft -= 8;
+	}
+
+	if (nBitsLeft)
+	{
+		*pOut = ReadUBitLong(nBitsLeft);
+	}
+}
+
+unsigned int bf_read::ReadUBitLong(int numbits)
+{
+	if (GetNumBitsLeft() < numbits)
+	{
+		m_iCurBit = m_nDataBits;
+		return 0;
+	}
+
+	unsigned int iStartBit = m_iCurBit & 31u;
+	int iLastBit = m_iCurBit + numbits - 1;
+	unsigned int iWordOffset1 = m_iCurBit >> 5;
+	unsigned int iWordOffset2 = iLastBit >> 5;
+	m_iCurBit += numbits;
+
+	extern unsigned long g_ExtraMasks[33];
+	unsigned int bitmask = g_ExtraMasks[numbits];
+
+	unsigned int dw1 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset1) >> iStartBit;
+	unsigned int dw2 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset2) << (32 - iStartBit);
+
+	return (dw1 | dw2) & bitmask;
+}
+
+unsigned int bf_read::PeekUBitLong(int numbits)
+{
+	unsigned int r;
+	int i, nBitValue;
+
+	bf_read savebf;
+	savebf = *this;
+
+	r = 0;
+	for (i = 0; i < numbits; i++)
+	{
+		nBitValue = ReadOneBit();
+		
+		if (nBitValue)
+		{
+			r |= GetBitForBitnum(i);
+		}
+	}
+
+	*this = savebf;
+	return r;
+}
+
+int bf_read::ReadSBitLong(int numbits)
+{
+	unsigned int r = ReadUBitLong(numbits);
+	unsigned int s = 1 << (numbits - 1);
+
+	if (r >= s)
+	{
+		r = r - s - s;
+	}
+
+	return r;
+}
+
+uint32 bf_read::ReadVarInt32()
+{
+	uint32 result = 0;
+	int count = 0;
+	uint32 b;
+
+	do
+	{
+		if (count == kMaxVarint32Bytes)
+		{
+			return result;
+		}
+		b = ReadUBitLong(8);
+		result |= (b & 0x7F) << (7 * count);
+		++count;
+	} while (b & 0x80);
+
+	return result;
+}
+
+int32 bf_read::ReadSignedVarInt32()
+{
+	uint32 value = ReadVarInt32();
+	return ZigZagDecode32(value);
+}
+
+unsigned int bf_read::ReadBitLong(int numbits, bool bSigned)
+{
+	if (bSigned)
+		return (unsigned int)ReadSBitLong(numbits);
+	else
+		return ReadUBitLong(numbits);
+}
+
+float bf_read::ReadBitCoord(void)
+{
+	int intval = 0;
+	int fractval = 0; 
+	int signbit = 0;
+	float value = 0.0;
+
+	intval = ReadOneBit();
+	fractval = ReadOneBit();
+
+	if (intval || fractval)
+	{
+		signbit = ReadOneBit();
+
+		if (intval)
+		{
+			intval = ReadUBitLong(COORD_INTEGER_BITS) + 1;
+		}
+
+		if (fractval)
+		{
+			fractval = ReadUBitLong(COORD_FRACTIONAL_BITS);
+		}
+
+		value = intval + ((float)fractval * COORD_RESOLUTION);
+
+		if (signbit)
+			value = -value;
+	}
+
+	return value;
+}
+
+float bf_read::ReadBitFloat()
+{
+	union { uint32 u; float f; } c = { ReadUBitLong(32) };
+	return c.f;
+}
+
+float bf_read::ReadBitNormal(void)
+{
+	int	signbit = ReadOneBit();
+
+	unsigned int fractval = ReadUBitLong(NORMAL_FRACTIONAL_BITS);
+
+	float value = (float)fractval * NORMAL_RESOLUTION;
+	
+	if (signbit)
+		value = -value;
+
+	return value;
+}
+
+void bf_read::ReadBitVec3Coord(Vector& fa)
+{
+	int xflag;
+	int yflag;
+	int zflag;
+	
+	fa.Init(0, 0, 0);
+
+	xflag = ReadOneBit();
+	yflag = ReadOneBit();
+	zflag = ReadOneBit();
+
+	if (xflag)
+		fa[0] = ReadBitCoord();
+	if (yflag)
+		fa[1] = ReadBitCoord();
+	if (zflag)
+		fa[2] = ReadBitCoord();
+}
+
+void bf_read::ReadBitVec3Normal(Vector& fa)
+{
+	int xflag = ReadOneBit();
+	int yflag = ReadOneBit();
+
+	if (xflag)
+		fa[0] = ReadBitNormal();
+	else
+		fa[0] = 0.0f;
+
+	if (yflag)
+		fa[1] = ReadBitNormal();
+	else
+		fa[1] = 0.0f;
+	
+	int znegative = ReadOneBit();
+
+	float fafafbfb = fa[0] * fa[0] + fa[1] * fa[1];
+	if (fafafbfb < 1.0f)
+		fa[2] = sqrt(1.0f - fafafbfb);
+	else
+		fa[2] = 0.0f;
+
+	if (znegative)
+		fa[2] = -fa[2];
+}
+
+void bf_read::ReadBitAngles(QAngle& fa)
+{
+	Vector tmp;
+	ReadBitVec3Coord(tmp);
+	fa.Init(tmp.x, tmp.y, tmp.z);
+}
+
+int	bf_read::ReadChar()
+{ 
+	return (char)ReadUBitLong(8);
+}
+
+int	bf_read::ReadByte()
+{ 
+	return ReadUBitLong(8);
+}
+
+int	bf_read::ReadShort()
+{
+	return (short)ReadUBitLong(16);
+}
+
+int	bf_read::ReadWord()
+{ 
+	return ReadUBitLong(16);
+}
+
+long bf_read::ReadLong()
+{
+	return ReadUBitLong(32);
+}
+
+float bf_read::ReadFloat()
+{
+	float ret;
+	ReadBits(&ret, 32);
+	
+	LittleFloat(&ret, &ret);
+	return ret;
+}
+
+bool bf_read::ReadBytes(void *pOut, int nBytes)
+{
+	ReadBits(pOut, nBytes << 3);
+	return true;
+}
+
+bool bf_read::ReadString(char *pStr, int maxLen, bool bLine, int *pOutNumChars)
+{
+	bool bTooSmall = false;
+	int iChar = 0;
+
+	while (1)
+	{
+		char val = ReadChar();
+		if (val == 0)
+			break;
+		else if (bLine && val == '\n')
+			break;
+
+		if (iChar < (maxLen - 1))
+		{
+			pStr[iChar] = val;
+			++iChar;
+		}
+		else
+		{
+			bTooSmall = true;
+		}
+	}
+	
+	pStr[iChar] = 0;
+
+	if (pOutNumChars)
+		*pOutNumChars = iChar;
+
+	return true;
+}
+
+char* bf_read::ReadAndAllocateString(bool *pOverflow)
+{
+	char str[2048];
+
+	int nChars;
+	bool bOverflow = !ReadString(str, sizeof(str), false, &nChars);
+	if (pOverflow)
+		*pOverflow = bOverflow;
+	
+	char *pRet = new char[nChars + 1];
+	for (int i = 0; i <= nChars; i++)
+		pRet[i] = str[i];
+
+	return pRet;
+}
+
+int bf_read::GetNumBytesRead()
+{
+	return BitByte(m_iCurBit);
+}
+
+int bf_read::GetNumBitsLeft()
+{
+	return m_nDataBits - m_iCurBit;
+}
+
+int bf_read::GetNumBytesLeft()
+{
+	return GetNumBitsLeft() >> 3;
+}
+
+int bf_read::GetNumBitsRead() const
+{
+	return m_iCurBit;
+}
+
+bool bf_read::Seek(int iBit)
+{
+	if (iBit < 0 || iBit > m_nDataBits)
+	{
+		m_iCurBit = m_nDataBits;
+		return false;
+	}
+	else
+	{
+		m_iCurBit = iBit;
+		return true;
+	}
+}
+
+bool bf_read::SeekRelative(int iBitDelta)
+{
+	return Seek(m_iCurBit + iBitDelta);
+}

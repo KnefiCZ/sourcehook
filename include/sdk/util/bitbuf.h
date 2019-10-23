@@ -87,204 +87,63 @@ public:
 	bf_read();
 	bf_read(const void *pData, int nBytes, int nBits = -1);
 
-	void			StartReading(const void *pData, int nBytes, int iStartBit = 0, int nBits = -1);
-	void			Reset();
+	void StartReading(const void *pData, int nBytes, int iStartBit = 0, int nBits = -1);
+	void Reset();
+	
+	int ReadOneBitNoCheck();
+	int ReadOneBit();
+	
+	const unsigned char* GetBasePointer() { return m_pData; }
 
-	void			ExciseBits(int startbit, int bitstoremove);
+	void ReadBits(void *pOut, int nBits);
+	
+	unsigned int ReadUBitLong(int numbits);
+	unsigned int PeekUBitLong(int numbits);
+	int ReadSBitLong(int numbits);
+	
+	uint32 ReadVarInt32();
+	//uint64 ReadVarInt64();
+	int32 ReadSignedVarInt32();
+	//int64 ReadSignedVarInt64();
 
-	int				ReadOneBit();
+	unsigned int ReadBitLong(int numbits, bool bSigned);
 
-	unsigned int	CheckReadUBitLong(int numbits);
-	int				ReadOneBitNoCheck();
-	bool			CheckForOverflow(int nBits);
+	float ReadBitCoord();
+	//float ReadBitCoordMP(bool bIntegral, bool bLowPrecision);
+	float ReadBitFloat();
+	float ReadBitNormal();
+	void ReadBitVec3Coord(Vector& fa);
+	void ReadBitVec3Normal(Vector& fa);
+	void ReadBitAngles(QAngle& fa);
 
-	const unsigned char*	GetBasePointer() { return m_pData; }
+	//unsigned int ReadBitCoordBits();
+	//unsigned int ReadBitCoordMPBits(bool bIntegral, bool bLowPrecision);
 
-	FORCEINLINE int TotalBytesAvailable(void) const
-	{
-		return m_nDataBytes;
-	}
+	int	ReadChar();
+	int	ReadByte();
+	int	ReadShort();
+	int	ReadWord();
+	long ReadLong();
+	//int64 ReadLongLong();
+	float ReadFloat();
+	bool ReadBytes(void *pOut, int nBytes);
 
-	void            ReadBits(void *pOut, int nBits);
+	bool ReadString(char *pStr, int bufLen, bool bLine = false, int *pOutNumChars = NULL);
 
-	int             ReadBitsClamped_ptr(void *pOut, size_t outSizeBytes, size_t nBits);
+	char* ReadAndAllocateString(bool *pOverflow = 0);
 
-	template <typename T, size_t N>
-	int ReadBitsClamped(T(&pOut)[N], size_t nBits)
-	{
-		return ReadBitsClamped_ptr(pOut, N * sizeof(T), nBits);
-	}
+	int GetNumBytesLeft();
+	int GetNumBytesRead();
+	int GetNumBitsLeft();
+	int GetNumBitsRead() const;
 
-	float			ReadBitAngle(int numbits);
+	inline bool Seek(int iBit);
+	inline bool SeekRelative(int iBitDelta);
 
-	unsigned int	ReadUBitLong(int numbits);
-	unsigned int	ReadUBitLongNoInline(int numbits);
-	unsigned int	PeekUBitLong(int numbits);
-	int				ReadSBitLong(int numbits);
-
-	unsigned int	ReadUBitVar();
-	unsigned int	ReadUBitVarInternal(int encodingType);
-
-	uint32			ReadVarInt32();
-	uint64			ReadVarInt64();
-	int32			ReadSignedVarInt32();
-	int64			ReadSignedVarInt64();
-
-	unsigned int	ReadBitLong(int numbits, bool bSigned);
-
-	float			ReadBitCoord();
-	float			ReadBitCoordMP(bool bIntegral, bool bLowPrecision);
-	float			ReadBitFloat();
-	float			ReadBitNormal();
-	void			ReadBitVec3Coord(Vector& fa);
-	void			ReadBitVec3Normal(Vector& fa);
-	void			ReadBitAngles(QAngle& fa);
-
-	unsigned int	ReadBitCoordBits();
-	unsigned int	ReadBitCoordMPBits(bool bIntegral, bool bLowPrecision);
-
-	FORCEINLINE int	ReadChar() { return (char)ReadUBitLong(8); }
-	FORCEINLINE int	ReadByte() { return ReadUBitLong(8); }
-	FORCEINLINE int	ReadShort() { return (short)ReadUBitLong(16); }
-	FORCEINLINE int	ReadWord() { return ReadUBitLong(16); }
-	FORCEINLINE long ReadLong() { return ReadUBitLong(32); }
-	int64			ReadLongLong();
-	float			ReadFloat();
-	bool			ReadBytes(void *pOut, int nBytes);
-
-	bool			ReadString(char *pStr, int bufLen, bool bLine = false, int *pOutNumChars = NULL);
-
-	char*			ReadAndAllocateString(bool *pOverflow = 0);
-
-	int				CompareBits(bf_read* other, int bits);
-	int				CompareBitsAt(int offset, bf_read* other, int otherOffset, int bits);
-
-	int				GetNumBytesLeft();
-	int				GetNumBytesRead();
-	int				GetNumBitsLeft();
-	int				GetNumBitsRead() const;
-
-	inline bool		Seek(int iBit);
-	inline bool		SeekRelative(int iBitDelta);
-
-	const unsigned char*	m_pData;
-	int						m_nDataBytes;
-	int						m_nDataBits;
-	int				m_iCurBit;
+	const unsigned char* m_pData;
+	int m_nDataBytes;
+	int m_nDataBits;
+	int m_iCurBit;
 };
-
-inline int bf_read::GetNumBytesRead()
-{
-	return BitByte(m_iCurBit);
-}
-
-inline int bf_read::GetNumBitsLeft()
-{
-	return m_nDataBits - m_iCurBit;
-}
-
-inline int bf_read::GetNumBytesLeft()
-{
-	return GetNumBitsLeft() >> 3;
-}
-
-inline int bf_read::GetNumBitsRead() const
-{
-	return m_iCurBit;
-}
-
-inline bool bf_read::Seek(int iBit)
-{
-	if (iBit < 0 || iBit > m_nDataBits)
-	{
-		SetOverflowFlag();
-		m_iCurBit = m_nDataBits;
-		return false;
-	}
-	else
-	{
-		m_iCurBit = iBit;
-		return true;
-	}
-}
-
-inline bool	bf_read::SeekRelative(int iBitDelta)
-{
-	return Seek(m_iCurBit + iBitDelta);
-}
-
-inline bool bf_read::CheckForOverflow(int nBits)
-{
-	if (m_iCurBit + nBits > m_nDataBits)
-	{
-		SetOverflowFlag();
-	}
-
-	return m_bOverflow;
-}
-
-inline int bf_read::ReadOneBitNoCheck()
-{
-	unsigned char value = m_pData[m_iCurBit >> 3] >> (m_iCurBit & 7);
-
-	++m_iCurBit;
-	return value & 1;
-}
-
-inline int bf_read::ReadOneBit()
-{
-	if (GetNumBitsLeft() <= 0)
-	{
-		SetOverflowFlag();
-		return 0;
-	}
-	return ReadOneBitNoCheck();
-}
-
-inline float bf_read::ReadBitFloat()
-{
-	union { uint32 u; float f; } c = { ReadUBitLong(32) };
-	return c.f;
-}
-
-FORCEINLINE unsigned int bf_read::ReadUBitVar()
-{
-	unsigned int sixbits = ReadUBitLong(6);
-	unsigned int encoding = sixbits & 3;
-	if (encoding)
-	{
-		return ReadUBitVarInternal(encoding);
-	}
-	return sixbits >> 2;
-}
-
-FORCEINLINE unsigned int bf_read::ReadUBitLong(int numbits)
-{
-	if (GetNumBitsLeft() < numbits)
-	{
-		m_iCurBit = m_nDataBits;
-		SetOverflowFlag();
-		return 0;
-	}
-
-	unsigned int iStartBit = m_iCurBit & 31u;
-	int iLastBit = m_iCurBit + numbits - 1;
-	unsigned int iWordOffset1 = m_iCurBit >> 5;
-	unsigned int iWordOffset2 = iLastBit >> 5;
-	m_iCurBit += numbits;
-
-	extern unsigned long g_ExtraMasks[33];
-	unsigned int bitmask = g_ExtraMasks[numbits];
-
-	unsigned int dw1 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset1) >> iStartBit;
-	unsigned int dw2 = LoadLittleDWord((unsigned long*)m_pData, iWordOffset2) << (32 - iStartBit);
-
-	return (dw1 | dw2) & bitmask;
-}
-
-FORCEINLINE int bf_read::CompareBits(bf_read* other, int numbits)
-{
-	return (ReadUBitLong(numbits) != other->ReadUBitLong(numbits));
-}
 
 #endif
