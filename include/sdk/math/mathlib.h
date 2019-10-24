@@ -55,6 +55,17 @@ struct matrix3x4_t
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+struct cplane_t
+{
+	Vector normal;
+	float dist;
+	byte type;
+	byte signbits;
+	byte pad[2];
+};
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 vec_t DotProduct(const vec_t *v1, const vec_t *v2);
 vec_t DotProduct(const Vector& a, const Vector& b);
 vec_t DotProduct(const Vector& a, const vec_t *b);

@@ -762,7 +762,7 @@ float bf_read::ReadBitCoord(void)
 			fractval = ReadUBitLong(COORD_FRACTIONAL_BITS);
 		}
 
-		value = intval + ((float)fractval * COORD_RESOLUTION);
+		value = static_cast<float>(intval + ((float)fractval * COORD_RESOLUTION));
 
 		if (signbit)
 			value = -value;
@@ -783,7 +783,7 @@ float bf_read::ReadBitNormal(void)
 
 	unsigned int fractval = ReadUBitLong(NORMAL_FRACTIONAL_BITS);
 
-	float value = (float)fractval * NORMAL_RESOLUTION;
+	float value = static_cast<float>((float)fractval * NORMAL_RESOLUTION);
 
 	if (signbit)
 		value = -value;

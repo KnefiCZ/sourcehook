@@ -138,6 +138,7 @@
     <ClCompile Include="src\sdk\bitbuf.cpp" />
     <ClCompile Include="src\sdk\hash.cpp" />
     <ClCompile Include="src\sdk\mathlib.cpp" />
+    <ClCompile Include="src\util\vmt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="include\sdk\util\crc.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
+    <ClInclude Include="src\util\vmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

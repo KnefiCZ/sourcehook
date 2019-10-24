@@ -2,7 +2,11 @@
 #define SDK_TRACE_H
 #pragma once
 
+#include "../common.h"
 #include "../math/mathlib.h"
+#include "../math/vector.h"
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #define   DISPSURF_FLAG_SURFACE         (1<<0)
 #define   DISPSURF_FLAG_WALKABLE        (1<<1)
@@ -93,9 +97,12 @@
 #define   MASK_CURRENT                  (CONTENTS_CURRENT_0|CONTENTS_CURRENT_90|CONTENTS_CURRENT_180|CONTENTS_CURRENT_270|CONTENTS_CURRENT_UP|CONTENTS_CURRENT_DOWN)
 #define   MASK_DEADSOLID                (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_WINDOW|CONTENTS_GRATE)
 
-class IHandleEntity;
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-enum class TraceType
+class IHandleEntity;
+class CBaseEntity;
+
+enum TraceType_t
 {
 	TRACE_EVERYTHING = 0,
 	TRACE_WORLD_ONLY,
@@ -103,96 +110,131 @@ enum class TraceType
 	TRACE_EVERYTHING_FILTER_PROPS,
 };
 
-class CBaseTrace
+enum DebugTraceCounterBehavior_t
 {
-public:
-	bool IsDispSurface(void) { return ((dispFlags & DISPSURF_FLAG_SURFACE) != 0); }
-	bool IsDispSurfaceWalkable(void) { return ((dispFlags & DISPSURF_FLAG_WALKABLE) != 0); }
-	bool IsDispSurfaceBuildable(void) { return ((dispFlags & DISPSURF_FLAG_BUILDABLE) != 0); }
-	bool IsDispSurfaceProp1(void) { return ((dispFlags & DISPSURF_FLAG_SURFPROP1) != 0); }
-	bool IsDispSurfaceProp2(void) { return ((dispFlags & DISPSURF_FLAG_SURFPROP2) != 0); }
-public:
-	Vector			startpos;
-	Vector			endpos;
-	cplane_t		plane;
+	kTRACE_COUNTER_SET = 0,
+	kTRACE_COUNTER_INC,
+};
 
-	float			fraction;
+struct csurface_t
+{
+	const char* name;
+	short surfaceProps;
+	unsigned short flags;
+};
 
-	int				contents;
-	unsigned short	dispFlags;
+struct trace_t
+{
+	Vector startpos;
+	Vector endpos;
+	cplane_t plane;
 
-	bool			allsolid;
-	bool			startsolid;
+	float fraction;
 
-	CBaseTrace() {}
-private:
-	CBaseTrace(const CBaseTrace& vOther);
+	int contents;
+	unsigned int dispFlags;
+
+	bool allsolid;
+	bool startsolid;
+
+	float fractionleftsolid;
+
+	csurface_t surface;
+
+	HitGroups hitgroup;
+	short physicsbone;
+
+	unsigned short worldSurfaceIndex;
+	CBaseEntity* m_pEntityHit;
+	int hitbox;
+};
+
+struct Ray_t
+{
+	VectorAligned m_Start;
+	VectorAligned m_Delta;
+	VectorAligned m_StartOffset;
+	VectorAligned m_Extents;
+
+	const matrix3x4_t* m_pWorldAxisTransform;
+
+	bool m_IsRay;
+	bool m_IsSwept;
+
+	Ray_t() : m_pWorldAxisTransform(NULL) { }
+
+	void Init(Vector vecStart, Vector vecEnd)
+	{
+		m_Delta = vecEnd - vecStart;
+		m_IsSwept = (m_Delta.LengthSqr() != 0);
+		m_Extents.x = m_Extents.y = m_Extents.z = 0.0f;
+		m_pWorldAxisTransform = NULL;
+		m_IsRay = true;
+		m_StartOffset.x = m_StartOffset.y = m_StartOffset.z = 0.0f;
+		m_Start = vecStart;
+	}
+
+	void Init(Vector const& start, Vector const& end, Vector const& mins, Vector const& maxs)
+	{
+		VectorSubtract(end, start, m_Delta);
+
+		m_pWorldAxisTransform = nullptr;
+		m_IsSwept = (m_Delta.LengthSqr() != 0);
+
+		VectorSubtract(maxs, mins, m_Extents);
+		m_Extents *= 0.5f;
+		m_IsRay = (m_Extents.LengthSqr() < 1e-6);
+
+		VectorAdd(mins, maxs, m_StartOffset);
+		m_StartOffset *= 0.5f;
+		VectorAdd(start, m_StartOffset, m_Start);
+		m_StartOffset *= -1.0f;
+	}
 };
 
 class ITraceFilter
 {
 public:
-	virtual bool ShouldHitEntity(IHandleEntity *pEntity, int contentsMask) = 0;
-	virtual TraceType GetTraceType() const = 0;
+	virtual bool ShouldHitEntity(CBaseEntity* pEntity, int contentsMask) = 0;
+	virtual TraceType_t GetTraceType() const = 0;
 };
 
-struct Ray_t
+class CTraceFilter : public ITraceFilter
 {
-	VectorAligned  m_Start;  // starting point, centered within the extents
-	VectorAligned  m_Delta;  // direction + length of the ray
-	VectorAligned  m_StartOffset; // Add this to m_Start to Get the actual ray start
-	VectorAligned  m_Extents;     // Describes an axis aligned box extruded along a ray
-	const matrix3x4_t* m_pWorldAxisTransform;
-	bool m_IsRay;  // are the extents zero?
-	bool m_IsSwept;     // is delta != 0?
-
-	Ray_t() : m_pWorldAxisTransform(NULL) {}
-
-	void Init(Vector const& start, Vector const& end)
+public:
+	bool ShouldHitEntity(CBaseEntity* pEntityHandle, int contentsMask)
 	{
-		m_Delta = end - start;
-
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
-
-		m_Extents.Init();
-
-		m_pWorldAxisTransform = NULL;
-		m_IsRay = true;
-		
-		m_StartOffset.Init();
-		m_Start = start;
+		return !(pEntityHandle == pSkip);
 	}
 
-	void Init(Vector const& start, Vector const& end, Vector const& mins, Vector const& maxs)
+	virtual TraceType_t GetTraceType() const
 	{
-		m_Delta = end - start;
-
-		m_pWorldAxisTransform = NULL;
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
-
-		m_Extents = maxs - mins;
-		m_Extents *= 0.5f;
-		m_IsRay = (m_Extents.LengthSqr() < 1e-6);
-		
-		m_StartOffset = maxs + mins;
-		m_StartOffset *= 0.5f;
-		m_Start = start + m_StartOffset;
-		m_StartOffset *= -1.0f;
+		return TRACE_EVERYTHING;
 	}
 
-	Vector InvDelta() const
+	void* pSkip;
+};
+
+class CTraceFilterEntitiesOnly : public ITraceFilter
+{
+public:
+	bool ShouldHitEntity(CBaseEntity* pEntityHandle, int contentsMask)
 	{
-		Vector vecInvDelta;
-		for (int iAxis = 0; iAxis < 3; ++iAxis) {
-			if (m_Delta[iAxis] != 0.0f) {
-				vecInvDelta[iAxis] = 1.0f / m_Delta[iAxis];
-			}
-			else {
-				vecInvDelta[iAxis] = FLT_MAX;
-			}
-		}
-		return vecInvDelta;
+		return !(pEntityHandle == pSkip);
 	}
+
+	virtual TraceType_t GetTraceType() const
+	{
+		return TRACE_ENTITIES_ONLY;
+	}
+
+	void* pSkip;
+};
+
+class IEntityEnumerator
+{
+public:
+	virtual bool EnumEntity(IHandleEntity* pHandleEntity) = 0;
 };
 
 #endif

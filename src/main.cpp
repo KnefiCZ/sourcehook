@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 
-DWORD __stdcall OnInject(void*)
+DWORD WINAPI OnInject(void*)
 {
 	return 1;
 }

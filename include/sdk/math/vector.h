@@ -53,12 +53,23 @@ public:
 class ALIGN(16) VectorAligned : public Vector
 {
 public:
-	inline VectorAligned() {};
+	inline VectorAligned(void) {};
 	inline VectorAligned(vec_t X, vec_t Y, vec_t Z)
 	{
 		Init(X, Y, Z);
 	}
 	
+	explicit VectorAligned(const Vector &vOther)
+	{
+		Init(vOther.x, vOther.y, vOther.z);
+	}
+
+	VectorAligned& operator=(const Vector &vOther)
+	{
+		Init(vOther.x, vOther.y, vOther.z);
+		return *this;
+	}
+
 	float w;
 };
 
