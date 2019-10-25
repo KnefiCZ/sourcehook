@@ -138,6 +138,7 @@
     <ClCompile Include="src\sdk\bitbuf.cpp" />
     <ClCompile Include="src\sdk\hash.cpp" />
     <ClCompile Include="src\sdk\mathlib.cpp" />
+    <ClCompile Include="src\util\patternscan.cpp" />
     <ClCompile Include="src\util\vmt.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,9 +157,13 @@
     <ClInclude Include="include\sdk\math\vector.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />
     <ClInclude Include="include\sdk\util\bitbytes.h" />
+    <ClInclude Include="include\sdk\util\clientclass.h" />
     <ClInclude Include="include\sdk\util\crc.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
+    <ClInclude Include="include\sdk\util\recv.h" />
+    <ClInclude Include="include\sdk\util\studio.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
+    <ClInclude Include="src\util\patternscan.h" />
     <ClInclude Include="src\util\vmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

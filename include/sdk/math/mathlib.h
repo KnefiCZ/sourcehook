@@ -3,9 +3,8 @@
 #pragma once
 
 #include "../common.h"
-
-class Vector;
-class QAngle;
+#include "sdk/math/vector.h"
+#include "sdk/math/qangle.h"
 
 #ifndef M_PI
 #define M_PI 3.141593f
