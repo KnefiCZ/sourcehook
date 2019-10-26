@@ -141,7 +141,7 @@ struct trace_t
 
 	csurface_t surface;
 
-	HitGroups hitgroup;
+	int hitgroup;
 	short physicsbone;
 
 	unsigned short worldSurfaceIndex;

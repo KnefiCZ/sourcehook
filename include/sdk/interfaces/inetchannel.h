@@ -11,6 +11,14 @@ class INetChannelHandler;
 typedef struct netpacket_s netpacket_t;
 typedef struct netadr_s	netadr_t;
 
+enum ConnectionStatus_t
+{
+	CONNECTION_STATE_DISCONNECTED = 0,
+	CONNECTION_STATE_CONNECTING,
+	CONNECTION_STATE_CONNECTION_FAILED,
+	CONNECTION_STATE_CONNECTED,
+};
+
 class INetChannel : public INetChannelInfo
 {
 public:
@@ -37,7 +45,7 @@ public:
 	virtual bool	SendData(bf_write &msg, bool bReliable = true) = 0;
 	virtual bool	SendFile(const char *filename, unsigned int transferID) = 0;
 	virtual void	DenyFile(const char *filename, unsigned int transferID) = 0;
-	virtual void	RequestFile_OLD(const char *filename, unsigned int transferID) = 0;	// get rid of this function when we version the 
+	virtual void	RequestFile_OLD(const char *filename, unsigned int transferID) = 0;
 	virtual void	SetChoked(void) = 0;
 	virtual int		SendDatagram(bf_write *data) = 0;
 	virtual bool	Transmit(bool onlyReliable = false) = 0;
@@ -72,6 +80,22 @@ public:
 	virtual int		GetMaxRoutablePayloadSize() = 0;
 
 	virtual int		GetProtocolVersion() = 0;
+public:
+	ConnectionStatus_t m_ConnectionState;
+
+	// last send outgoing sequence number
+	int			m_nOutSequenceNr;
+	// last received incoming sequnec number
+	int			m_nInSequenceNr;
+	// last received acknowledge outgoing sequnce number
+	int			m_nOutSequenceNrAck;
+	// state of outgoing reliable data (0/1) flip flop used for loss detection
+	int			m_nOutReliableState;
+	// state of incoming reliable data
+	int			m_nInReliableState;
+	
+	int			m_nChokedPackets;
+	int			m_PacketDrop;
 };
 
 #endif

@@ -51,17 +51,17 @@ class IClientEntity {};
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-#define NETVAR(type, name, netvar) \
+#define NETVAR(type, name, table, netvar) \
     type& name##() \
 	{ \
-        static unsigned short offset_##name = g_pNetvar->GetOffset(netvar); \
+        static int offset_##name = g_pNetvar->GetOffset(table, netvar); \
         return *(type*)((DWORD)this + offset_##name); \
     }
 
-#define PNETVAR(type, name, netvar) \
+#define PNETVAR(type, name, table, netvar) \
     type* name##() \
 	{ \
-        static unsigned short offset_##name = g_pNetvar->GetOffset(netvar); \
+        static int offset_##name = g_pNetvar->GetOffset(table, netvar); \
         return (type*)((DWORD)this + offset_##name); \
     }
 
@@ -80,13 +80,13 @@ public:
 		return (IClientNetworkable*)(this + 0x8);
 	}
 public:
-	NETVAR(QAngle, m_angRotation, "DT_BaseEntity->m_angRotation");
-	NETVAR(float, m_flSimulationTime, "DT_BaseEntity->m_flSimulationTime");
-	NETVAR(int, m_iHealth, "DT_BaseEntity->m_iHealth");
-	NETVAR(int, m_iTeamNum, "DT_BaseEntity->m_iTeamNum");
-	PNETVAR(int, m_nModelIndex, "DT_BaseEntity->m_nModelIndex");
-	NETVAR(Vector, m_vecOrigin, "DT_BaseEntity->m_vecOrigin");
-	NETVAR(Vector, m_vecVelocity, "DT_BaseEntity->m_vecVelocity[0]");
+	NETVAR(QAngle, m_angRotation, "DT_BaseEntity", "m_angRotation");
+	NETVAR(float, m_flSimulationTime, "DT_BaseEntity", "m_flSimulationTime");
+	NETVAR(int, m_iHealth, "DT_BaseEntity", "m_iHealth");
+	NETVAR(int, m_iTeamNum, "DT_BaseEntity", "m_iTeamNum");
+	NETVAR(int, m_nModelIndex, "DT_BaseEntity", "m_nModelIndex");
+	NETVAR(Vector, m_vecOrigin, "DT_BaseEntity", "m_vecOrigin");
+	NETVAR(Vector, m_vecVelocity, "DT_BaseEntity", "m_vecVelocity[0]");
 };
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
