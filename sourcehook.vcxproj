@@ -149,11 +149,13 @@
     <ClInclude Include="include\sdk\interfaces\iappsystem.h" />
     <ClInclude Include="include\sdk\interfaces\ibaseclientdll.h" />
     <ClInclude Include="include\sdk\interfaces\ibaseinterface.h" />
+    <ClInclude Include="include\sdk\interfaces\icliententitylist.h" />
     <ClInclude Include="include\sdk\interfaces\ienginetrace.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannel.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannelinfo.h" />
     <ClInclude Include="include\sdk\interfaces\ivengineclient.h" />
     <ClInclude Include="include\sdk\interfaceinfo.h" />
+    <ClInclude Include="include\sdk\interfaces\ivmodelinfo.h" />
     <ClInclude Include="include\sdk\math\mathlib.h" />
     <ClInclude Include="include\sdk\math\math_pfns.h" />
     <ClInclude Include="include\sdk\math\qangle.h" />
@@ -163,6 +165,7 @@
     <ClInclude Include="include\sdk\util\clientclass.h" />
     <ClInclude Include="include\sdk\util\console.h" />
     <ClInclude Include="include\sdk\util\crc.h" />
+    <ClInclude Include="include\sdk\util\globalvars.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
     <ClInclude Include="include\sdk\util\recv.h" />
     <ClInclude Include="include\sdk\util\studio.h" />

@@ -5,7 +5,7 @@
 
 DWORD WINAPI OnInject(void*)
 {
-	SDK::Link();
+	SDK::Init();
 
 	return 1;
 }

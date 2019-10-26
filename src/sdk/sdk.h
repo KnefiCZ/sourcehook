@@ -2,17 +2,20 @@
 #define SDK_MAIN_H
 #pragma once
 
-//#include "../util/vmt.h"
-
 /*======================IVEngineClient======================*/
 #include "sdk/interfaces/ivengineclient.h"
-extern IVEngineClient* g_pEngine;
+inline IVEngineClient* g_pEngine;
+/*==========================================================*/
+
+/*======================IBaseClientDLL======================*/
+#include "sdk/interfaces/ibaseclientdll.h"
+inline IBaseClientDLL* g_pClient;
 /*==========================================================*/
 
 
 namespace SDK
 {
-	void Link();
+	void Init();
 }
 
 #endif

@@ -125,5 +125,14 @@
     <ClInclude Include="src\sdk\sdk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\sdk\interfaces\icliententitylist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\interfaces\ivmodelinfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\util\globalvars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

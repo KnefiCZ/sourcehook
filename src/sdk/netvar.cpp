@@ -1,14 +1,10 @@
 #include "netvar.h"
+#include "sdk.h"
 #include "sdk/util/clientclass.h"
 #include "sdk/util/console.h"
 
-CNetvarManager* g_pNetvar = new CNetvarManager;
-
 void CNetvarManager::Init()
 {
-	/*
-	TODO: add IBaseClientDLL->GetAllClasses()
-
 	for (ClientClass* pClass = g_pClient->GetAllClasses(); pClass != nullptr; pClass = pClass->m_pNext)
 	{
 		if (pClass->m_pRecvTable)
@@ -16,7 +12,6 @@ void CNetvarManager::Init()
 			AddToMap(pClass->m_pRecvTable);
 		}
 	}
-	*/
 }
 
 void CNetvarManager::AddToMap(RecvTable * pTable)

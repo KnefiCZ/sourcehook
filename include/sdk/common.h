@@ -29,11 +29,11 @@ typedef float vec_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-template<typename FuncType>
-inline FuncType CallVFunction(void* ppClass, DWORD index) {
-	PDWORD pVTable = *(PDWORD*)ppClass;
+template<typename Fn>
+inline Fn CallVFunction(void* ppClass, DWORD index) {
+	DWORD* pVTable = *(PDWORD*)ppClass;
 	DWORD dwAddress = pVTable[index];
-	return (FuncType)(dwAddress);
+	return reinterpret_cast<Fn>(dwAddress);
 }
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/

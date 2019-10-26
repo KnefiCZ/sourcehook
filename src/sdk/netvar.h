@@ -16,6 +16,6 @@ public:
 	void Dump();
 };
 
-extern CNetvarManager* g_pNetvar;
+inline CNetvarManager* g_pNetvar;
 
 #endif

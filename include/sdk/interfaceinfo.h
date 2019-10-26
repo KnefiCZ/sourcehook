@@ -13,16 +13,16 @@
 #define IVENGINECLIENT_INDEX_WORLDTOSCREENMATRIX 36
 #define IVENGINECLIENT_INDEX_GETNETCHANNELINFO 72
 
-#define IVENGINECLIENT_INTERFACE "IVEngineClient0013"
+#define IVENGINECLIENT_INTERFACE "IVEngineClient013"
 /*------------------------------------------------------------------------------*/
 
 
 
-/*--------------------------------IEngineTrace--------------------------------*/
+/*---------------------------------IEngineTrace---------------------------------*/
 #define IENGINETRACE_INDEX_TRACERAY 4
 
 #define IENGINETRACE_INTERFACE "EngineTraceClient003"
-/*----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 
 
@@ -32,6 +32,42 @@
 #define IBASECLIENTDLL_INDEX_FRAMESTAGENOTIFY 35
 
 #define IBASECLIENTDLL_INTERFACE "VClient017"
+/*------------------------------------------------------------------------------*/
+
+
+
+/*------------------------------IClientEntityList-------------------------------*/
+#define ICLIENTENTITYLIST_INDEX_GETCLIENTENTITY 3
+#define ICLIENTENTITYLIST_INDEX_GETHIGHESTENTITYINDEX 6
+
+#define ICLIENTENTITYLIST_INTERFACE "VClientEntityList003"
+/*------------------------------------------------------------------------------*/
+
+
+
+/*--------------------------------IVModelInfo-----------------------------------*/
+#define IVMODELINFO_GETMODEL 1
+#define IVMODELINFO_GETMODELINDEX 2
+#define IVMODELINFO_GETMODELNAME 3
+#define IVMODELINFO_GETSTUDIOMODEL 28
+
+#define IVMODELINFOCLIENT_INTERFACE "VModelInfoClient006"
+/*------------------------------------------------------------------------------*/
+
+
+
+/*------------------------------IClientRenderable-------------------------------*/
+#define ICLIENTRENDERABLE_INDEX_GETRENDERORIGIN 1
+#define ICLIENTRENDERABLE_INDEX_GETRENDERANGLES 2
+#define ICLIENTRENDERABLE_INDEX_GETMODEL 9
+/*------------------------------------------------------------------------------*/
+
+
+
+/*------------------------------IClientNetworkable------------------------------*/
+#define ICLIENTNETWORKABLE_INDEX_GETCLIENTCLASS 2
+#define ICLIENTNETWORKABLE_INDEX_ISDORMANT 8
+#define ICLIENTNETWORKABLE_INDEX_ENTINDEX 9
 /*------------------------------------------------------------------------------*/
 
 #endif

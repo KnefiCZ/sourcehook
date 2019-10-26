@@ -29,7 +29,8 @@ enum RenderViewInfo_t
 
 class IBaseClientDLL
 {
-	virtual ClientClass* GetAllClasses()
+public:
+	ClientClass* GetAllClasses()
 	{
 		return CallVFunction<ClientClass*(__thiscall*)(void*)>(this, IBASECLIENTDLL_INDEX_GETALLCLASSES)(this);
 	}
