@@ -78,19 +78,4 @@ inline FuncType CallVFunction(void* ppClass, DWORD index) {
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-enum class HitGroups : int
-{
-	HITGROUP_GENERIC = 0,
-	HITGROUP_HEAD,
-	HITGROUP_CHEST,
-	HITGROUP_STOMACH,
-	HITGROUP_LEFTARM,
-	HITGROUP_RIGHTARM,
-	HITGROUP_LEFTLEG,
-	HITGROUP_RIGHTLEG,
-	HITGROUP_GEAR
-};
-
-/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
-
 #endif

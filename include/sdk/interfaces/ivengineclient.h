@@ -8,7 +8,7 @@
 class INetChannelInfo;
 class VMatrix;
 
-typedef struct player_info_s
+struct player_info_t
 {
 	char			name[32];
 	int				userID;
@@ -19,7 +19,7 @@ typedef struct player_info_s
 	bool			ishltv;
 	int				customFiles[4];
 	unsigned char	filesDownloaded;
-} player_info_t;
+};
 
 class IVEngineClient
 {
@@ -29,7 +29,7 @@ public:
 		return CallVFunction<void(__thiscall*)(void*, int&, int&)>(this, IVENGINECLIENT_INDEX_GETSCREENSIZE)(this, width, height);
 	}
 
-	bool GetPlayerInfo(int ent_num, player_info_t *pinfo)
+	bool GetPlayerInfo(int ent_num, player_info_t* pinfo)
 	{
 		return CallVFunction<bool(__thiscall*)(void*, int, player_info_t*)>(this, IVENGINECLIENT_INDEX_GETPLAYERINFO)(this, ent_num, pinfo);
 	}

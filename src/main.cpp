@@ -1,8 +1,12 @@
 #include <Windows.h>
 #include <stdio.h>
 
+#include "sdk/sdk.h"
+
 DWORD WINAPI OnInject(void*)
 {
+	SDK::Link();
+
 	return 1;
 }
 

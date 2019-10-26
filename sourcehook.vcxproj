@@ -136,8 +136,11 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\sdk\bitbuf.cpp" />
+    <ClCompile Include="src\sdk\entity.cpp" />
     <ClCompile Include="src\sdk\hash.cpp" />
     <ClCompile Include="src\sdk\mathlib.cpp" />
+    <ClCompile Include="src\sdk\netvar.cpp" />
+    <ClCompile Include="src\sdk\sdk.cpp" />
     <ClCompile Include="src\util\patternscan.cpp" />
     <ClCompile Include="src\util\vmt.cpp" />
   </ItemGroup>
@@ -158,11 +161,15 @@
     <ClInclude Include="include\sdk\util\bitbuf.h" />
     <ClInclude Include="include\sdk\util\bitbytes.h" />
     <ClInclude Include="include\sdk\util\clientclass.h" />
+    <ClInclude Include="include\sdk\util\console.h" />
     <ClInclude Include="include\sdk\util\crc.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
     <ClInclude Include="include\sdk\util\recv.h" />
     <ClInclude Include="include\sdk\util\studio.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
+    <ClInclude Include="src\sdk\entity.h" />
+    <ClInclude Include="src\sdk\netvar.h" />
+    <ClInclude Include="src\sdk\sdk.h" />
     <ClInclude Include="src\util\patternscan.h" />
     <ClInclude Include="src\util\vmt.h" />
   </ItemGroup>
