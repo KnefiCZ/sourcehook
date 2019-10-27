@@ -3,6 +3,7 @@
 #pragma once
 
 #include "../math/mathlib.h"
+#include "../math/qangle.h"
 
 #define MAX_QPATH  260
 

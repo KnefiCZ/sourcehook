@@ -30,6 +30,8 @@ public:
 	}
 };
 
-class IVModelInfoClient : IVModelInfo {};
+class IVModelInfoClient : public IVModelInfo
+{ 
+};
 
 #endif

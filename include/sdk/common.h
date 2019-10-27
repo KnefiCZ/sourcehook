@@ -31,7 +31,7 @@ typedef float vec_t;
 
 template<typename Fn>
 inline Fn CallVFunction(void* ppClass, DWORD index) {
-	DWORD* pVTable = *(PDWORD*)ppClass;
+	PDWORD pVTable = *(PDWORD*)ppClass;
 	DWORD dwAddress = pVTable[index];
 	return reinterpret_cast<Fn>(dwAddress);
 }

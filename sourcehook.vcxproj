@@ -158,6 +158,7 @@
     <ClInclude Include="include\sdk\interfaces\ivmodelinfo.h" />
     <ClInclude Include="include\sdk\math\mathlib.h" />
     <ClInclude Include="include\sdk\math\math_pfns.h" />
+    <ClInclude Include="include\sdk\math\matrices.h" />
     <ClInclude Include="include\sdk\math\qangle.h" />
     <ClInclude Include="include\sdk\math\vector.h" />
     <ClInclude Include="include\sdk\util\bitbuf.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="include\sdk\util\crc.h" />
     <ClInclude Include="include\sdk\util\globalvars.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
+    <ClInclude Include="include\sdk\util\memalloc.h" />
     <ClInclude Include="include\sdk\util\recv.h" />
     <ClInclude Include="include\sdk\util\studio.h" />
     <ClInclude Include="include\sdk\util\trace.h" />

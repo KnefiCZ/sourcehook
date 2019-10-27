@@ -13,7 +13,7 @@
 #define IVENGINECLIENT_INDEX_WORLDTOSCREENMATRIX 36
 #define IVENGINECLIENT_INDEX_GETNETCHANNELINFO 72
 
-#define IVENGINECLIENT_INTERFACE "IVEngineClient013"
+#define IVENGINECLIENT_INTERFACE "VEngineClient013"
 /*------------------------------------------------------------------------------*/
 
 
@@ -56,10 +56,18 @@
 
 
 
+/*--------------------------------IClientMode-----------------------------------*/
+#define ICLIENTMODE_INDEX_CREATEMOVE 21
+/*------------------------------------------------------------------------------*/
+
+
+
 /*------------------------------IClientRenderable-------------------------------*/
 #define ICLIENTRENDERABLE_INDEX_GETRENDERORIGIN 1
 #define ICLIENTRENDERABLE_INDEX_GETRENDERANGLES 2
 #define ICLIENTRENDERABLE_INDEX_GETMODEL 9
+#define ICLIENTRENDERABLE_INDEX_SETUPBONES 16
+#define ICLIENTRENDERABLE_INDEX_GETRENDERBOUNDS 20
 /*------------------------------------------------------------------------------*/
 
 
@@ -68,6 +76,13 @@
 #define ICLIENTNETWORKABLE_INDEX_GETCLIENTCLASS 2
 #define ICLIENTNETWORKABLE_INDEX_ISDORMANT 8
 #define ICLIENTNETWORKABLE_INDEX_ENTINDEX 9
+/*------------------------------------------------------------------------------*/
+
+
+
+/*--------------------------------C_BaseEntity----------------------------------*/
+#define CBASEENTITY_INDEX_GETABSORIGIN 9
+#define CBASEENTITY_INDEX_GETABSANGLES 10
 /*------------------------------------------------------------------------------*/
 
 #endif

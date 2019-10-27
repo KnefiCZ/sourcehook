@@ -31,6 +31,29 @@ inline IVModelInfoClient* g_pModelInfo;
 inline IEngineTrace* g_pEngineTrace;
 /*==========================================================*/
 
+
+/*=====================CGlobalVarsBase======================*/
+#include "sdk/util/globalvars.h"
+inline CGlobalVarsBase* g_pGlobals;
+
+#define TICK_INTERVAL (gpGlobals->interval_per_tick)
+#define TIME_TO_TICKS(dt) ((int)(0.5f + (float)(dt) / TICK_INTERVAL))
+#define TICKS_TO_TIME(t) (TICK_INTERVAL *(t))
+#define ROUND_TO_TICKS(t) (TICK_INTERVAL * TIME_TO_TICKS(t))
+/*==========================================================*/
+
+
+/*======================IClientMode=========================*/
+class IClientMode;
+inline IClientMode* g_pClientMode;
+/*==========================================================*/
+
+
+/*======================LocalPlayer=========================*/
+class CBasePlayer;
+inline CBasePlayer* g_pLocalPlayer;
+/*==========================================================*/
+
 namespace SDK
 {
 	void Init();

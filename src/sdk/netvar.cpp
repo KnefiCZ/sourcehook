@@ -64,17 +64,19 @@ void CNetvarManager::Dump()
 		return;
 	}
 
-	char szBuffer[65536];
+	char szBuffer[1024];
 
 	for (auto it : m_TableProps)
 	{
 		sprintf(szBuffer, "%s\n", it.first.c_str());
+		fwrite(szBuffer, sizeof(char), strlen(szBuffer), pFile);
 
 		for (auto it1 : it.second->m_Props)
 		{
 			sprintf(szBuffer, "\t%s [%04X]\n", it1.second->m_pVarName, it1.second->m_Offset);
+			fwrite(szBuffer, sizeof(char), strlen(szBuffer), pFile);
 		}
 	}
-
-	fwrite(szBuffer, sizeof(char), strlen(szBuffer), pFile);
+	
+	fclose(pFile);
 }

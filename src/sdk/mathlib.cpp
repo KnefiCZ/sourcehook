@@ -8,6 +8,7 @@
 #include "sdk/math/math_pfns.h"
 #include "sdk/math/mathlib.h"
 
+#include "sdk/math/matrices.h"
 #include "sdk/math/vector.h"
 #include "sdk/math/qangle.h"
 /*==============================================================================*/
