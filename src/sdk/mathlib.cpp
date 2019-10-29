@@ -1,7 +1,6 @@
 /*==============================================================================*/
 #include <limits>
 #include <math.h>
-#include <xmmintrin.h>
 
 #include "sdk/util/bitbytes.h"
 
@@ -19,70 +18,23 @@
 /*==============================================================================*/
 float FastSqrt(float x)
 {
-	__m128 root = _mm_sqrt_ss(_mm_load_ss(&x));
-	return *(reinterpret_cast<float *>(&root));
+	return sqrt(x);
 }
 
-float FastRSqrtFast(float x)
+void FastSinCos(float angle, float* s, float* c)
 {
-	__m128 rroot = _mm_rsqrt_ss(_mm_load_ss(&x));
-	return *(reinterpret_cast<float *>(&rroot));
-}
-
-float FastRSqrt(float x)
-{
-	float rroot = FastRSqrtFast(x);
-	return (0.5f * rroot) * (3.f - (x * rroot) * rroot);
-}
-
-void FastSinCos(float angle, float* sin, float* cos)
-{
-	angle = angle - floorf(angle * M_INV_TWO_PI) * M_TWO_PI;
-	float sinmultiplier = (angle > 0.f && angle < M_PI) ? 1.f : -1.f;
-	angle = angle > 0.f ? angle : -angle;
-
-	if (angle < M_HALF_PI)
-	{
-		*cos = FastCos(angle);
-		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
-		return;
-	}
-
-	if (angle < M_PI)
-	{
-		*cos = -FastCos(M_PI - angle);
-		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
-		return;
-	}
-
-	if (angle < M_THREE_HALF_PI)
-	{
-		*cos = -FastCos(angle - M_PI);
-		*sin = sinmultiplier * FastSqrt(1.f - *cos**cos);
-		return;
-	}
-
-	*cos = FastCos(M_TWO_PI - angle);
-	*sin = sinmultiplier * FastSqrt(1.f - *cos * *cos);
-
-	return;
+	*s = sin(angle);
+	*c = cos(angle);
 }
 
 float FastSin(float x)
 {
-	return FastCos(M_HALF_PI - x);
+	return sin(x);
 }
 
 float FastCos(float x)
 {
-	static float c1 = 0.99940307f;
-	static float c2 = -0.49558072f;
-	static float c3 = 0.03679168f;
-	float x2;
-
-	x2 = x * x;
-
-	return (c1 + x2 * (c2 + c3 * x2));
+	return cos(x);
 }
 
 
@@ -238,19 +190,19 @@ void VectorAngles(const Vector& forward, QAngle& angles)
 	angles[2] = 0;
 }
 
-void ClampAngles(QAngle& angles)
+void NormalizeAngles(QAngle& angles)
 {
-	if (angles[0] > 89.0f)
-		angles[0] = 89.0f;
-	else if (angles[0] < -89.0f)
-		angles[0] = -89.0f;
-
-	if (angles[1] > 180.0f)
-		angles[1] = 180.0f;
-	else if (angles[1] < -180.0f)
-		angles[1] = -180.0f;
-
-	angles[2] = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		if (angles[i] > 180.0)
+		{
+			angles[i] -= 360.0;
+		}
+		else if (angles[i] < -180.0)
+		{
+			angles[i] += 360.0;
+		}
+	}
 }
 
 float GetFOV(const QAngle& viewAngle, const QAngle& aimAngle)
@@ -300,6 +252,82 @@ void matrix3x4_t::Init(const Vector& xAxis, const Vector& yAxis, const Vector& z
 	m_flMatVal[0][0] = xAxis.x; m_flMatVal[0][1] = yAxis.x; m_flMatVal[0][2] = zAxis.x; m_flMatVal[0][3] = vecOrigin.x;
 	m_flMatVal[1][0] = xAxis.y; m_flMatVal[1][1] = yAxis.y; m_flMatVal[1][2] = zAxis.y; m_flMatVal[1][3] = vecOrigin.y;
 	m_flMatVal[2][0] = xAxis.z; m_flMatVal[2][1] = yAxis.z; m_flMatVal[2][2] = zAxis.z; m_flMatVal[2][3] = vecOrigin.z;
+}
+
+
+/*==============================================================================*/
+//	matrix3x4_t
+/*==============================================================================*/
+VMatrix::VMatrix()
+{
+}
+
+VMatrix::VMatrix(vec_t m00, vec_t m01, vec_t m02, vec_t m03, vec_t m10, vec_t m11, vec_t m12, vec_t m13, vec_t m20, vec_t m21, vec_t m22, vec_t m23, vec_t m30, vec_t m31, vec_t m32, vec_t m33)
+{
+	Init(
+		m00, m01, m02, m03,
+		m10, m11, m12, m13,
+		m20, m21, m22, m23,
+		m30, m31, m32, m33
+	);
+}
+
+VMatrix::VMatrix(const matrix3x4_t& matrix3x4)
+{
+	Init(matrix3x4);
+}
+
+VMatrix::VMatrix(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis)
+{
+	Init(
+		xAxis.x, yAxis.x, zAxis.x, 0.0f,
+		xAxis.y, yAxis.y, zAxis.y, 0.0f,
+		xAxis.z, yAxis.z, zAxis.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+}
+
+VMatrix::VMatrix(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector& translation)
+{
+	Init(
+		xAxis.x, yAxis.x, zAxis.x, translation.x,
+		xAxis.y, yAxis.y, zAxis.y, translation.y,
+		xAxis.z, yAxis.z, zAxis.z, translation.z,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+}
+
+void VMatrix::Init(vec_t m00, vec_t m01, vec_t m02, vec_t m03, vec_t m10, vec_t m11, vec_t m12, vec_t m13, vec_t m20, vec_t m21, vec_t m22, vec_t m23, vec_t m30, vec_t m31, vec_t m32, vec_t m33)
+{
+	m[0][0] = m00;
+	m[0][1] = m01;
+	m[0][2] = m02;
+	m[0][3] = m03;
+
+	m[1][0] = m10;
+	m[1][1] = m11;
+	m[1][2] = m12;
+	m[1][3] = m13;
+
+	m[2][0] = m20;
+	m[2][1] = m21;
+	m[2][2] = m22;
+	m[2][3] = m23;
+
+	m[3][0] = m30;
+	m[3][1] = m31;
+	m[3][2] = m32;
+	m[3][3] = m33;
+}
+
+void VMatrix::Init(const matrix3x4_t& matrix3x4)
+{
+	memcpy(m, matrix3x4.Base(), sizeof(matrix3x4_t));
+
+	m[3][0] = 0.0f;
+	m[3][1] = 0.0f;
+	m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 }
 
 

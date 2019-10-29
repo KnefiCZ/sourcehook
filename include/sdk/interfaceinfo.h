@@ -62,6 +62,26 @@
 
 
 
+/*--------------------------------IPrediction-----------------------------------*/
+#define IPREDICTION_INDEX_UPDATE 3
+#define IPREDICTION_INDEX_SETUPMOVE 18
+#define IPREDICTION_INDEX_FINISHMOVE 19
+
+#define IPREDICTION_INTERFACE "VClientPrediction001"
+/*------------------------------------------------------------------------------*/
+
+
+
+/*-------------------------------IGameMovement-----------------------------------*/
+#define IGAMEMOVEMENT_INDEX_PROCESSMOVEMENT 1
+#define IGAMEMOVEMENT_INDEX_STARTTRACKPREDICTIONERRORS 2
+#define IGAMEMOVEMENT_INDEX_FINISHTRACKPREDICTIONERRORS 3
+
+#define IGAMEMOVEMENT_INTERFACE "GameMovement001"
+/*------------------------------------------------------------------------------*/
+
+
+
 /*------------------------------IClientRenderable-------------------------------*/
 #define ICLIENTRENDERABLE_INDEX_GETRENDERORIGIN 1
 #define ICLIENTRENDERABLE_INDEX_GETRENDERANGLES 2
@@ -83,6 +103,19 @@
 /*--------------------------------C_BaseEntity----------------------------------*/
 #define CBASEENTITY_INDEX_GETABSORIGIN 9
 #define CBASEENTITY_INDEX_GETABSANGLES 10
+/*------------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------C_BaseCombatWeapon-------------------------------*/
+#define CBASECOMBATWEAPON_INDEX_GETBULLETSPREAD 325
+/*------------------------------------------------------------------------------*/
+
+
+
+/*------------------------------IDirect3DDevice9--------------------------------*/
+#define IDIRECT3DDEVICE9_INDEX_ENDSCENE 42
+#define IDIRECT3DDEVICE9_INDEX_RESET 16
 /*------------------------------------------------------------------------------*/
 
 #endif

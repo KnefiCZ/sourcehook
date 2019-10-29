@@ -1,4 +1,5 @@
 #include "entity.h"
+#include "../util/patternscan.h"
 #include "sdk.h"
 
 IClientEntity* CBaseHandle::Get()
@@ -25,9 +26,11 @@ bool CBasePlayer::GetHitboxPos(int hitbox, Vector& pos)
 		return false;
 
 	matrix3x4_t matrix[MAXSTUDIOBONES];
-	if(!GetRenderable()->SetupBones(matrix, MAXSTUDIOBONES, 0x100, 0))
-		return false;
 
+	InvalidateBoneCache();
+	if(!GetRenderable()->SetupBones(matrix, MAXSTUDIOBONES, BONE_USED_BY_HITBOX, g_pGlobals->curtime))
+		return false;
+	
 	mstudiobbox_t* studioBox = studioHdr->GetHitboxSet(0)->GetHitbox(hitbox);
 	if(!studioBox)
 		return false;
@@ -38,4 +41,46 @@ bool CBasePlayer::GetHitboxPos(int hitbox, Vector& pos)
 
 	pos = (min + max) * 0.5f;
 	return true;
+}
+
+bool CBasePlayer::IsAlive()
+{
+	return m_iHealth() > 0;
+}
+
+QAngle& CBasePlayer::ViewPunchAngle()
+{
+	static int offset = g_pNetvar->GetOffset("DT_LocalPlayerExclusive", "m_Local");
+	static int offset2 = g_pNetvar->GetOffset("DT_Local", "m_vecPunchAngle");
+
+	return *(QAngle*)((DWORD)this + offset2 + offset);
+}
+
+Vector CBasePlayer::GetEyePos()
+{
+	return GetAbsOrigin() + m_vecViewOffset();
+}
+
+void CBasePlayer::InvalidateBoneCache()
+{
+	typedef void(__thiscall* InvalidateBoneCacheFn)(void*);
+	static InvalidateBoneCacheFn InvalidateBoneCache;
+
+	if (!InvalidateBoneCache)
+	{
+		InvalidateBoneCache = (InvalidateBoneCacheFn)(PatternScanIDA(GetModuleHandle("client.dll"), "A1 ? ? ? ? 48 C7 81 ? ? ? ? ? ? ? ?"));
+	}
+
+	if (!InvalidateBoneCache)
+	{
+		return;
+	}
+
+	InvalidateBoneCache(this);
+}
+
+bool CBaseEntity::IsPlayer()
+{
+	char* szName = GetNetworkable()->GetClientClass()->m_pNetworkName;
+	return szName[1] == 'G' && szName[6] == 'P';
 }

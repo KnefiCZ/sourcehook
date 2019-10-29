@@ -3,8 +3,6 @@
 #pragma once
 
 float FastSqrt(float x);
-float FastRSqrtFast(float x);
-float FastRSqrt(float x);
 void FastSinCos(float x, float* s, float* c);
 float FastSin(float x);
 float FastCos(float x);

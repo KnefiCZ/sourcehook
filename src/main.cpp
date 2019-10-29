@@ -6,6 +6,14 @@
 DWORD WINAPI OnInject(void*)
 {
 	SDK::Init();
+	SDK::Hook();
+
+	return 1;
+}
+
+DWORD WINAPI OnShutdown(void*)
+{
+	SDK::Shutdown();
 
 	return 1;
 }
@@ -26,6 +34,7 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 			CreateThread(0, 0, OnInject, 0, 0, 0);
 			break;
 		case DLL_PROCESS_DETACH:
+			CreateThread(0, 0, OnShutdown, 0, 0, 0);
 			break;
 	}
 

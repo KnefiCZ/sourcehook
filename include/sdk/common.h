@@ -66,7 +66,6 @@ inline Fn CallVFunction(void* ppClass, DWORD index) {
 #define COORD_DENOMINATOR			(1<<(COORD_FRACTIONAL_BITS))
 #define COORD_RESOLUTION			(1.0/(COORD_DENOMINATOR))
 
-// Special threshold for networking multiplayer origins
 #define COORD_INTEGER_BITS_MP		11
 #define COORD_FRACTIONAL_BITS_MP_LOWPRECISION 3
 #define COORD_DENOMINATOR_LOWPRECISION			(1<<(COORD_FRACTIONAL_BITS_MP_LOWPRECISION))

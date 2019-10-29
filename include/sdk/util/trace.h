@@ -4,8 +4,6 @@
 
 #include "../common.h"
 #include "../math/mathlib.h"
-#include "../math/matrices.h"
-#include "../math/vector.h"
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -101,6 +99,8 @@
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 class IHandleEntity;
+class CTraceListData;
+class CPhysCollide;
 class CBaseEntity;
 
 enum TraceType_t
@@ -111,10 +111,61 @@ enum TraceType_t
 	TRACE_EVERYTHING_FILTER_PROPS,
 };
 
-enum DebugTraceCounterBehavior_t
+struct Ray_t
 {
-	kTRACE_COUNTER_SET = 0,
-	kTRACE_COUNTER_INC,
+	Ray_t() { }
+	VectorAligned  m_Start;
+	VectorAligned  m_Delta;
+	VectorAligned  m_StartOffset;
+	VectorAligned  m_Extents;
+	bool    m_IsRay;
+	bool    m_IsSwept;
+
+	void Init(const Vector& vecStart, Vector& vecEnd)
+	{
+		m_Delta = vecEnd - vecStart;
+		m_IsSwept = (m_Delta.Length() != 0);
+		m_Extents.x = m_Extents.y = m_Extents.z = 0.0f;
+		m_IsRay = true;
+		m_StartOffset.x = m_StartOffset.y = m_StartOffset.z = 0.0f;
+		m_Start = vecStart;
+	}
+
+	void Init(Vector const& start, Vector const& end, Vector const& mins, Vector const& maxs)
+	{
+		m_Delta = end - start;
+		//VectorSubtract(end, start, m_Delta);
+
+		m_IsSwept = (m_Delta.LengthSqr() != 0);
+
+		VectorSubtract(maxs, mins, m_Extents);
+		m_Extents *= 0.5f;
+		m_IsRay = (m_Extents.LengthSqr() < 1e-6);
+
+		// Offset m_Start to be in the center of the box...
+		VectorAdd(mins, maxs, m_StartOffset);
+		m_StartOffset *= 0.5f;
+		VectorAdd(start, m_StartOffset, m_Start);
+		m_StartOffset *= -1.0f;
+	}
+
+	Vector InvDelta() const
+	{
+		Vector vecInvDelta;
+		for (int iAxis = 0; iAxis < 3; ++iAxis)
+		{
+			if (m_Delta[iAxis] != 0.0f)
+			{
+				vecInvDelta[iAxis] = 1.0f / m_Delta[iAxis];
+			}
+			else
+			{
+				vecInvDelta[iAxis] = FLT_MAX;
+			}
+		}
+		return vecInvDelta;
+	}
+private:
 };
 
 struct csurface_t
@@ -129,113 +180,64 @@ struct trace_t
 	Vector startpos;
 	Vector endpos;
 	cplane_t plane;
-
 	float fraction;
-
 	int contents;
-	unsigned int dispFlags;
-
+	unsigned short dispFlags;
 	bool allsolid;
 	bool startsolid;
-
 	float fractionleftsolid;
-
 	csurface_t surface;
-
 	int hitgroup;
 	short physicsbone;
-
-	unsigned short worldSurfaceIndex;
-	CBaseEntity* m_pEntityHit;
+	CBaseEntity* m_pEnt;
 	int hitbox;
-};
-
-struct Ray_t
-{
-	VectorAligned m_Start;
-	VectorAligned m_Delta;
-	VectorAligned m_StartOffset;
-	VectorAligned m_Extents;
-
-	const matrix3x4_t* m_pWorldAxisTransform;
-
-	bool m_IsRay;
-	bool m_IsSwept;
-
-	Ray_t() : m_pWorldAxisTransform(NULL) { }
-
-	void Init(Vector vecStart, Vector vecEnd)
-	{
-		m_Delta = vecEnd - vecStart;
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
-		m_Extents.x = m_Extents.y = m_Extents.z = 0.0f;
-		m_pWorldAxisTransform = NULL;
-		m_IsRay = true;
-		m_StartOffset.x = m_StartOffset.y = m_StartOffset.z = 0.0f;
-		m_Start = vecStart;
-	}
-
-	void Init(Vector const& start, Vector const& end, Vector const& mins, Vector const& maxs)
-	{
-		VectorSubtract(end, start, m_Delta);
-
-		m_pWorldAxisTransform = nullptr;
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
-
-		VectorSubtract(maxs, mins, m_Extents);
-		m_Extents *= 0.5f;
-		m_IsRay = (m_Extents.LengthSqr() < 1e-6);
-
-		VectorAdd(mins, maxs, m_StartOffset);
-		m_StartOffset *= 0.5f;
-		VectorAdd(start, m_StartOffset, m_Start);
-		m_StartOffset *= -1.0f;
-	}
 };
 
 class ITraceFilter
 {
 public:
-	virtual bool ShouldHitEntity(CBaseEntity* pEntity, int contentsMask) = 0;
-	virtual TraceType_t GetTraceType() const = 0;
+	virtual bool			ShouldHitEntity(void* pEntity, int mask) = 0;
+	virtual TraceType_t            GetTraceType() const = 0;
 };
 
 class CTraceFilter : public ITraceFilter
 {
 public:
-	bool ShouldHitEntity(CBaseEntity* pEntityHandle, int contentsMask)
+	bool ShouldHitEntity(void* pEntityHandle, int contentsMask)
 	{
 		return !(pEntityHandle == pSkip);
 	}
-
-	virtual TraceType_t GetTraceType() const
+	virtual TraceType_t	GetTraceType() const
 	{
 		return TRACE_EVERYTHING;
 	}
-
 	void* pSkip;
 };
 
-class CTraceFilterEntitiesOnly : public ITraceFilter
+typedef bool(*ShouldHitFunc_t)(void *pHandleEntity, int contentsMask);
+class CTraceFilterSimple : public CTraceFilter
 {
 public:
-	bool ShouldHitEntity(CBaseEntity* pEntityHandle, int contentsMask)
-	{
-		return !(pEntityHandle == pSkip);
-	}
+	// It does have a base, but we'll never network anything below here..
 
-	virtual TraceType_t GetTraceType() const
-	{
-		return TRACE_ENTITIES_ONLY;
-	}
+	CTraceFilterSimple(const void *passentity, int collisionGroup, ShouldHitFunc_t pExtraShouldHitCheckFn = NULL);
+	virtual bool ShouldHitEntity(void *pHandleEntity, int contentsMask);
+	virtual void SetPassEntity(const void *pPassEntity) { m_pPassEnt = pPassEntity; }
+	virtual void SetCollisionGroup(int iCollisionGroup) { m_collisionGroup = iCollisionGroup; }
 
-	void* pSkip;
+	const void *GetPassEntity(void) { return m_pPassEnt; }
+
+private:
+	const void *m_pPassEnt;
+	int m_collisionGroup;
+	ShouldHitFunc_t m_pExtraShouldHitCheckFunction;
+
 };
 
 class IEntityEnumerator
 {
 public:
-	virtual bool EnumEntity(IHandleEntity* pHandleEntity) = 0;
+	virtual bool EnumEntity(IHandleEntity *pHandleEntity) = 0;
 };
 
 #endif

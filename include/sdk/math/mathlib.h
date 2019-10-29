@@ -66,9 +66,14 @@ void AngleVectors(const QAngle &angles, Vector& forward);
 void AngleVectors(const QAngle &angles, Vector& forward, Vector& right, Vector& up);
 void VectorAngles(const Vector& forward, QAngle& angles);
 
-void ClampAngles(QAngle& angles);
+void NormalizeAngles(QAngle& angles);
 float GetFOV(const QAngle& viewAngle, const QAngle& aimAngle);
 QAngle CalcAngle(const Vector& src, const Vector& dst);
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+bool ScreenTransform(const Vector& a, Vector& b);
+bool WorldToScreen(const Vector& a, Vector& b);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 

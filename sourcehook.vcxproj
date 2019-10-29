@@ -89,7 +89,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,7 +116,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,12 +134,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\aimbot.cpp" />
+    <ClCompile Include="src\features\bhop.cpp" />
+    <ClCompile Include="src\features\nospread.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\sdk\bitbuf.cpp" />
     <ClCompile Include="src\sdk\entity.cpp" />
     <ClCompile Include="src\sdk\hash.cpp" />
     <ClCompile Include="src\sdk\mathlib.cpp" />
     <ClCompile Include="src\sdk\netvar.cpp" />
+    <ClCompile Include="src\features\enginepred.cpp" />
     <ClCompile Include="src\sdk\sdk.cpp" />
     <ClCompile Include="src\util\patternscan.cpp" />
     <ClCompile Include="src\util\vmt.cpp" />
@@ -151,8 +155,10 @@
     <ClInclude Include="include\sdk\interfaces\ibaseinterface.h" />
     <ClInclude Include="include\sdk\interfaces\icliententitylist.h" />
     <ClInclude Include="include\sdk\interfaces\ienginetrace.h" />
+    <ClInclude Include="include\sdk\interfaces\igamemovement.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannel.h" />
     <ClInclude Include="include\sdk\interfaces\inetchannelinfo.h" />
+    <ClInclude Include="include\sdk\interfaces\iprediction.h" />
     <ClInclude Include="include\sdk\interfaces\ivengineclient.h" />
     <ClInclude Include="include\sdk\interfaceinfo.h" />
     <ClInclude Include="include\sdk\interfaces\ivmodelinfo.h" />
@@ -166,14 +172,22 @@
     <ClInclude Include="include\sdk\util\clientclass.h" />
     <ClInclude Include="include\sdk\util\console.h" />
     <ClInclude Include="include\sdk\util\crc.h" />
+    <ClInclude Include="include\sdk\util\flags.h" />
     <ClInclude Include="include\sdk\util\globalvars.h" />
     <ClInclude Include="include\sdk\util\md5.h" />
     <ClInclude Include="include\sdk\util\memalloc.h" />
+    <ClInclude Include="include\sdk\util\random.h" />
     <ClInclude Include="include\sdk\util\recv.h" />
     <ClInclude Include="include\sdk\util\studio.h" />
     <ClInclude Include="include\sdk\util\trace.h" />
+    <ClInclude Include="include\sdk\util\usercmd.h" />
+    <ClInclude Include="src\features\aimbot.h" />
+    <ClInclude Include="src\features\bhop.h" />
+    <ClInclude Include="src\features\nospread.h" />
+    <ClInclude Include="src\glua.h" />
     <ClInclude Include="src\sdk\entity.h" />
     <ClInclude Include="src\sdk\netvar.h" />
+    <ClInclude Include="src\features\enginepred.h" />
     <ClInclude Include="src\sdk\sdk.h" />
     <ClInclude Include="src\util\patternscan.h" />
     <ClInclude Include="src\util\vmt.h" />
