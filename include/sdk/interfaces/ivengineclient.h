@@ -68,6 +68,8 @@ public:
 	{
 		return CallVFunction<INetChannelInfo*(__thiscall*)(void*)>(this, IVENGINECLIENT_INDEX_GETNETCHANNELINFO)(this);
 	}
+
+
 };
 
 #endif

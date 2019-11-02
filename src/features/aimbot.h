@@ -9,8 +9,8 @@ class CAimbot
 {
 	CBasePlayer* m_pTarget = nullptr;
 
-	bool RayTraceCheck(CBasePlayer* pLocal, CBasePlayer* pOther, int iHitbox);
-	void FindBestTarget(CBasePlayer* pLocal, CUserCmd* pCmd);
+	bool RayTraceCheck(CBasePlayer* pOther, Vector& vecShootPos, int iHitbox);
+	void FindBestTarget(CUserCmd* pCmd, Vector& vecShootPos);
 public:
 	void Run(CUserCmd* pCmd);
 };

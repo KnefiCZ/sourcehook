@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\sdk\util\clientstate.h" />
     <ClCompile Include="src\features\aimbot.cpp" />
     <ClCompile Include="src\features\bhop.cpp" />
     <ClCompile Include="src\features\nospread.cpp" />

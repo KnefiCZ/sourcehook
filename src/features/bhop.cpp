@@ -4,13 +4,11 @@
 
 void CBhop::Run(CUserCmd* pCmd)
 {
-	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	
-	if (pCmd->buttons.IsFlagSet(IN_JUMP) && !pLocalPlayer->m_fFlags().IsFlagSet(FL_ONGROUND))
+	if (pCmd->buttons.IsFlagSet(IN_JUMP) && !g_pLocalPlayer->m_fFlags().IsFlagSet(FL_ONGROUND))
 	{
 		pCmd->buttons.ClearFlag(IN_JUMP);
 	}
-	else if (pCmd->buttons.IsFlagSet(IN_JUMP) && pLocalPlayer->m_fFlags().IsFlagSet(FL_ONGROUND))
+	else if (pCmd->buttons.IsFlagSet(IN_JUMP) && g_pLocalPlayer->m_fFlags().IsFlagSet(FL_ONGROUND))
 	{
 		pCmd->forwardmove = 10000;
 	}

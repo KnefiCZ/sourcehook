@@ -54,6 +54,9 @@
     <ClCompile Include="src\features\aimbot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\sdk\util\clientstate.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sdk\common.h">

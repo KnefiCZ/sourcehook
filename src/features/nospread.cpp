@@ -5,16 +5,42 @@
 #include "sdk/util/md5.h"
 #include "sdk/util/random.h"
 
-void CNospread::GetSpreadInternal(Vector& vecSpread)
+#define VECTOR_CONE_15DEGREES 0.13053
+
+bool CNospread::GetSpreadInternal(CBaseCombatWeapon* pWep, Vector& vecSpread)
 {
-	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)pLocalPlayer->m_hActiveWeapon().Get();
-	//printf("0x%p\n", pWeapon);
-	vecSpread = pWeapon->GetBulletSpread();
+	printf("doesnt use lua, spread on\n");
+	vecSpread = pWep->GetBulletSpread();
+	return true;
 }
 
-void CNospread::PredictSpread(CUserCmd* pCmd, QAngle& angRef)
+bool CNospread::GetSpreadLUA(CBaseCombatWeapon* pWep, Vector& vecSpread)
 {
+	printf("uses lua, spread off\n");
+	return false;
+}
+
+bool CNospread::FindBestMethod(Vector& vecSpread)
+{
+	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
+	CBaseCombatWeapon* pWep = (CBaseCombatWeapon*)pLocalPlayer->m_hActiveWeapon().Get();
+
+	if (pWep->UsesLua())
+	{
+		return GetSpreadLUA(pWep, vecSpread);
+	}
+	else
+	{
+		return GetSpreadInternal(pWep, vecSpread);
+	}
+}
+
+bool CNospread::PredictSpread(CUserCmd* pCmd, QAngle& angRef)
+{
+	Vector vecSpread;
+	if (!FindBestMethod(vecSpread))
+		return false;
+	
 	unsigned int uiSeed = MD5_PseudoRandom(pCmd->command_number) & 0x7FFFFFFF;
 	RandomSeed(uiSeed & 255);
 
@@ -22,20 +48,16 @@ void CNospread::PredictSpread(CUserCmd* pCmd, QAngle& angRef)
 	float y = RandomFloat(-0.5f, 0.5f) + RandomFloat(-0.5f, 0.5f);
 
 	Vector forward, right, up;
-
 	NormalizeAngles(pCmd->viewangles);
 	AngleVectors(pCmd->viewangles, forward, right, up);
 
-	Vector vecSpread;
-	GetSpreadInternal(vecSpread);
-	printf("Spread: %.3f, %.3f, %.3f\n", vecSpread.x, vecSpread.y, vecSpread.z);
 	vecSpread *= -1;
-
 	Vector vecDir = forward + (right * vecSpread.x * x) + (up * vecSpread.y * y);
 	VectorNormalize(vecDir);
 	
 	VectorAngles(vecDir, angRef);
 	NormalizeAngles(angRef);
+	return true;
 }
 
 void CNospread::RemoveRecoil(CUserCmd* pCmd)

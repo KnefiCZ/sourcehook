@@ -13,6 +13,7 @@ class CEnginePrediction
 public:
 	int* m_pPredictionRandomSeed;
 
+	void Update();
 	void StartPrediction(CUserCmd* pCmd);
 	void EndPrediction(CUserCmd* pCmd);
 };

@@ -6,11 +6,15 @@
 #include "sdk/math/qangle.h"
 #include "sdk/math/vector.h"
 
+class CBaseCombatWeapon;
+
 class CNospread
 {
-	void GetSpreadInternal(Vector& vecSpread);
+	bool GetSpreadInternal(CBaseCombatWeapon* pWep, Vector& vecSpread);
+	bool GetSpreadLUA(CBaseCombatWeapon* pWep, Vector& vecSpread);
+	bool FindBestMethod(Vector& vecSpread);
 public:
-	void PredictSpread(CUserCmd* pCmd, QAngle& angRef);
+	bool PredictSpread(CUserCmd* pCmd, QAngle& angRef);
 	void RemoveRecoil(CUserCmd* pCmd);
 };
 

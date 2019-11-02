@@ -45,7 +45,7 @@ bool CBasePlayer::GetHitboxPos(int hitbox, Vector& pos)
 
 bool CBasePlayer::IsAlive()
 {
-	return m_iHealth() > 0;
+	return m_lifeState == LIFE_ALIVE;
 }
 
 QAngle& CBasePlayer::ViewPunchAngle()
@@ -53,7 +53,7 @@ QAngle& CBasePlayer::ViewPunchAngle()
 	static int offset = g_pNetvar->GetOffset("DT_LocalPlayerExclusive", "m_Local");
 	static int offset2 = g_pNetvar->GetOffset("DT_Local", "m_vecPunchAngle");
 
-	return *(QAngle*)((DWORD)this + offset2 + offset);
+	return *(QAngle*)((DWORD)this + offset + offset2);
 }
 
 Vector CBasePlayer::GetEyePos()
@@ -63,7 +63,7 @@ Vector CBasePlayer::GetEyePos()
 
 void CBasePlayer::InvalidateBoneCache()
 {
-	typedef void(__thiscall* InvalidateBoneCacheFn)(void*);
+	typedef void (__thiscall* InvalidateBoneCacheFn)(void*);
 	static InvalidateBoneCacheFn InvalidateBoneCache;
 
 	if (!InvalidateBoneCache)
@@ -77,10 +77,4 @@ void CBasePlayer::InvalidateBoneCache()
 	}
 
 	InvalidateBoneCache(this);
-}
-
-bool CBaseEntity::IsPlayer()
-{
-	char* szName = GetNetworkable()->GetClientClass()->m_pNetworkName;
-	return szName[1] == 'G' && szName[6] == 'P';
 }

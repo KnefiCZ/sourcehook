@@ -65,6 +65,8 @@ void SDK::Init()
 	g_pGlobals = **(CGlobalVarsBase***)((*(DWORD**)g_pClient)[0] + 0x55);
 	g_pClientMode = **(IClientMode***)((*(DWORD**)g_pClient)[10] + 0x5);
 
+	g_pClientState = *(CClientState**)((*(DWORD**)g_pEngine)[IVENGINECLIENT_INDEX_ISPAUSED] + 0x1);
+
 	/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 	g_pMoveHelper = **(IMoveHelper***)(PatternScanIDA(hClient, IMOVEHELPER_PATTERN) + 0x2);
@@ -95,6 +97,8 @@ void SDK::Init()
 	printf("g_pModelInfo: 0x%p\n", g_pModelInfo);
 	printf("g_pEngineTrace: 0x%p\n", g_pEngineTrace);
 	printf("g_pGlobals: 0x%p\n", g_pGlobals);
+	printf("g_pClientMode: 0x%p\n", g_pClientMode);
+	printf("g_pClientState: 0x%p\n", g_pClientState);
 	printf("g_pMoveHelper: 0x%p\n", g_pMoveHelper);
 	printf("g_pDevice: 0x%p\n", g_pDevice);
 	printf("g_pLuaShared: 0x%p\n", g_pLuaShared);
@@ -114,8 +118,15 @@ bool __fastcall HookCreateMove(IClientMode* thisptr, int, float flInputSampleTim
 
 	bool& bSendPacket = *(***(bool****)(dwAddr)-0x1);
 	bSendPacket = true;
+
+	if (g_pEngine->IsInGame() && g_pEngine->IsConnected())
+	{
+		g_pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
+	}
+	else
+		goto ORIGINAL;
 	
-	//g_pPrediction->Update(); - i don't know what arguments to give dis
+	g_pEnginePred->Update();
 	g_pBhop->Run(pCmd);
 
 	if (pCmd->command_number != 0)
@@ -125,8 +136,9 @@ bool __fastcall HookCreateMove(IClientMode* thisptr, int, float flInputSampleTim
 		if (pCmd->buttons.IsFlagSet(IN_ATTACK))
 		{
 			g_pAimbot->Run(pCmd);
-			g_pNospread->PredictSpread(pCmd, pCmd->viewangles);
-			g_pNospread->RemoveRecoil(pCmd);
+
+			if (g_pNospread->PredictSpread(pCmd, pCmd->viewangles))
+				g_pNospread->RemoveRecoil(pCmd);
 
 			printf("->Ang: %.4f, %.4f, %.4f\n", pCmd->viewangles.x, pCmd->viewangles.y, pCmd->viewangles.z);
 		}
@@ -134,6 +146,8 @@ bool __fastcall HookCreateMove(IClientMode* thisptr, int, float flInputSampleTim
 		g_pEnginePred->EndPrediction(pCmd);
 	}
 	
+	goto ORIGINAL;
+ORIGINAL:
 	g_pClientModeVMT->GetOriginal<bool(__thiscall*)(void*, float, void*)>(ICLIENTMODE_INDEX_CREATEMOVE)(thisptr, flInputSampleTime, pCmd);
 	return false;
 };
@@ -151,11 +165,11 @@ HRESULT WINAPI EndScene(IDirect3DDevice9* pDevice)
 /*==============================================================================*/
 HRESULT WINAPI Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	long hr = g_pDeviceVMT->GetOriginal<decltype(&Reset)>(IDIRECT3DDEVICE9_INDEX_RESET)(pDevice, pPresentationParameters);
+	HRESULT result = g_pDeviceVMT->GetOriginal<decltype(&Reset)>(IDIRECT3DDEVICE9_INDEX_RESET)(pDevice, pPresentationParameters);
 	
 
 
-	return hr;
+	return result;
 }
 
 /*==============================================================================*/
@@ -167,10 +181,10 @@ void SDK::Hook()
 	g_pClientModeVMT->Hook(HookCreateMove, ICLIENTMODE_INDEX_CREATEMOVE);
 	g_pClientModeVMT->Install();
 
-	//g_pDeviceVMT = new VMT(g_pDevice);
-	//g_pDeviceVMT->Hook(EndScene, IDIRECT3DDEVICE9_INDEX_ENDSCENE);
-	//g_pDeviceVMT->Hook(Reset, IDIRECT3DDEVICE9_INDEX_RESET);
-	//g_pDeviceVMT->Install();
+	g_pDeviceVMT = new VMT(g_pDevice);
+	g_pDeviceVMT->Hook(EndScene, IDIRECT3DDEVICE9_INDEX_ENDSCENE);
+	g_pDeviceVMT->Hook(Reset, IDIRECT3DDEVICE9_INDEX_RESET);
+	g_pDeviceVMT->Install();
 }
 
 /*==============================================================================*/
@@ -179,7 +193,7 @@ void SDK::Hook()
 void SDK::Shutdown()
 {
 	g_pClientModeVMT->Uninstall();
-	//g_pDeviceVMT->Uninstall();
+	g_pDeviceVMT->Uninstall();
 }
 
 

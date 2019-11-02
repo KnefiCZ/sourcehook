@@ -12,6 +12,7 @@
 #define IVENGINECLIENT_INDEX_ISDRAWINGLOADINGIMAGE 28
 #define IVENGINECLIENT_INDEX_WORLDTOSCREENMATRIX 36
 #define IVENGINECLIENT_INDEX_GETNETCHANNELINFO 72
+#define IVENGINECLIENT_INDEX_ISPAUSED 84 // used for clientstate
 
 #define IVENGINECLIENT_INTERFACE "VEngineClient013"
 /*------------------------------------------------------------------------------*/
@@ -103,6 +104,7 @@
 /*--------------------------------C_BaseEntity----------------------------------*/
 #define CBASEENTITY_INDEX_GETABSORIGIN 9
 #define CBASEENTITY_INDEX_GETABSANGLES 10
+#define CBASEENTITY_INDEX_USESLUA 170
 /*------------------------------------------------------------------------------*/
 
 
@@ -117,5 +119,11 @@
 #define IDIRECT3DDEVICE9_INDEX_ENDSCENE 42
 #define IDIRECT3DDEVICE9_INDEX_RESET 16
 /*------------------------------------------------------------------------------*/
+
+
+/*
+Dear archi...
+FUCKING REMEMBER TO DIVIDE THE ADDRESS BY 4 TO GET THE INDEX!!!!
+*/
 
 #endif

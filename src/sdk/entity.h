@@ -4,6 +4,7 @@
 
 #include "sdk/interfaceinfo.h"
 #include "sdk/common.h"
+#include "sdk/util/usercmd.h"
 #include "sdk/util/clientclass.h"
 #include "sdk/util/studio.h"
 #include "sdk/util/flags.h"
@@ -23,6 +24,12 @@ class IClientEntity {};
 #define	FL_CLIENT (1<<7)
 #define FL_FAKECLIENT (1<<8)
 #define	FL_INWATER (1<<9)
+
+#define	LIFE_ALIVE 0
+#define	LIFE_DYING 1
+#define	LIFE_DEAD 2
+#define LIFE_RESPAWNABLE 3
+#define LIFE_DISCARDBODY 4
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -92,12 +99,6 @@ public:
         return (type*)((DWORD)this + offset_##name); \
     }
 
-#define ENTVAR(type, name, offset) \
-    inline type& name##() \
-	{ \
-        return *(type*)((DWORD)this + offset); \
-    }
-
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 class CBaseHandle
@@ -132,8 +133,13 @@ public:
 	{
 		return CallVFunction<QAngle&(__thiscall*)(void*)>(this, CBASEENTITY_INDEX_GETABSANGLES)(this);
 	}
+
+	bool UsesLua()
+	{
+		return CallVFunction<bool(__thiscall*)(void*)>(this, CBASEENTITY_INDEX_USESLUA)(this);
+	}
 public:
-	bool IsPlayer();
+	//bool IsPlayer(); disabled for now
 public:
 	NETVAR(int, m_nModelIndex, "DT_BaseEntity", "m_nModelIndex");
 	NETVAR(Vector, m_vecVelocity, "DT_BaseEntity", "m_vecVelocity[0]");
@@ -150,6 +156,14 @@ public:
 	}
 public:
 	
+};
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+class CWeaponPistol : public CBaseCombatWeapon
+{
+public:
+	NETVAR(float, m_flAccuracyPenalty, "DT_WeaponPistol", "m_flAccuracyPenalty");
 };
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -171,6 +185,7 @@ public:
 	NETVAR(CBaseHandle, m_hActiveWeapon, "DT_BaseCombatCharacter", "m_hActiveWeapon");
 	NETVAR(CBaseHandle, m_hObserverTarget, "DT_BasePlayer", "m_hObserverTarget");
 	NETVAR(CUtlFlags<int>, m_fFlags, "DT_BasePlayer", "m_fFlags");
+	NETVAR(int, m_lifeState, "DT_BasePlayer", "m_lifeState");
 	NETVAR(Vector, m_vecViewOffset, "DT_LocalPlayerExclusive", "m_vecViewOffset[0]");
 };
 

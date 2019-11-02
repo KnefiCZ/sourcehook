@@ -100,6 +100,13 @@ inline VMT* g_pDeviceVMT;
 
 
 
+/*======================CClientState========================*/
+#include "sdk/util/clientstate.h"
+inline CClientState* g_pClientState;
+/*==========================================================*/
+
+
+
 /*====================Garry's Mod Lua=======================*/
 #include "../glua.h"
 inline ILuaShared* g_pLuaShared;

@@ -4,40 +4,36 @@
 
 #define HITBOX_HEAD 0 // for testing
 
-bool CAimbot::RayTraceCheck(CBasePlayer* pLocal, CBasePlayer* pOther, int iHitbox)
+bool CAimbot::RayTraceCheck(CBasePlayer* pOther, Vector& vecShootPos, int iHitbox)
 {
 	trace_t trace;
 	Ray_t ray;
 	CTraceFilter filter;
-	filter.pSkip = pLocal;
+	filter.pSkip = g_pLocalPlayer;
+	
+	pOther->GetHitboxPos(iHitbox, vecShootPos);
 
-	Vector vecHitboxPos;
-	pOther->GetHitboxPos(iHitbox, vecHitboxPos);
-
-	ray.Init(pLocal->GetEyePos(), vecHitboxPos);
+	ray.Init(g_pLocalPlayer->GetEyePos(), vecShootPos);
 	g_pEngineTrace->TraceRay(ray, MASK_SHOT, &filter, &trace);
 
 	return trace.m_pEnt == pOther || trace.fraction >= 0.98f;
 }
 
-void CAimbot::FindBestTarget(CBasePlayer* pLocal, CUserCmd* pCmd)
+void CAimbot::FindBestTarget(CUserCmd* pCmd, Vector& vecShootPos)
 {
 	CBasePlayer* pTarget = nullptr;
 
-	for (unsigned int i = 1; i <= 32; i++)
+	for (unsigned int i = 1; i <= g_pEngine->GetMaxClients(); i++)
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(i);
 
 		if (!pPlayer)
 			continue;
 
-		if (!pPlayer->IsPlayer())
-			continue;
-
 		if (!pPlayer->IsAlive())
 			continue;
 
-		if (pPlayer == pLocal)
+		if (pPlayer == g_pLocalPlayer)
 			continue;
 
 		if (pPlayer->GetNetworkable()->IsDormant())
@@ -46,7 +42,7 @@ void CAimbot::FindBestTarget(CBasePlayer* pLocal, CUserCmd* pCmd)
 			continue;
 		}
 
-		if (!RayTraceCheck(pLocal, pPlayer, HITBOX_HEAD))
+		if (!RayTraceCheck(pPlayer, vecShootPos, HITBOX_HEAD))
 		{
 			printf("%i not visible\n", i);
 			continue;
@@ -60,24 +56,17 @@ void CAimbot::FindBestTarget(CBasePlayer* pLocal, CUserCmd* pCmd)
 
 void CAimbot::Run(CUserCmd* pCmd)
 {
-	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	FindBestTarget(pLocalPlayer, pCmd);
+	Vector vecShootPos;
+	FindBestTarget(pCmd, vecShootPos);
 
-	if (m_pTarget != nullptr)
+	if (m_pTarget)
 	{
 		QAngle angAim;
-		Vector vecHitboxPos;
-		m_pTarget->GetHitboxPos(HITBOX_HEAD, vecHitboxPos);
-
-		Vector vecEyePos = pLocalPlayer->GetEyePos();
+		Vector vecEyePos = g_pLocalPlayer->GetEyePos();
 		
-		printf("Eye: %.4f, %.4f, %.4f\n", vecEyePos.x, vecEyePos.y, vecEyePos.z);
-		printf("Head: %.4f, %.4f, %.4f\n", vecHitboxPos.x, vecHitboxPos.y, vecHitboxPos.z);
-		
-		VectorAngles(vecHitboxPos - vecEyePos, angAim);
+		VectorAngles(vecShootPos - vecEyePos, angAim);
 		NormalizeAngles(angAim);
 
-		printf("Ang: %.4f, %.4f, %.4f\n", angAim.x, angAim.y, angAim.z);
 		pCmd->viewangles = angAim;
 	}
 }
