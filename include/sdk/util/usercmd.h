@@ -35,20 +35,20 @@
 class CUserCmd
 {
 public:
-	int		command_number;
-	int		tick_count;
-	QAngle	viewangles;
-	float	forwardmove;
-	float	sidemove;
-	float	upmove;
+	int command_number;
+	int tick_count;
+	QAngle viewangles;
+	float forwardmove;
+	float sidemove;
+	float upmove;
 	CUtlFlags<int> buttons;
-	byte    impulse;
-	int		weaponselect;
-	int		weaponsubtype;
-	int		random_seed;
-	short	mousedx;
-	short	mousedy;
-	bool	hasbeenpredicted;
+	byte impulse;
+	int weaponselect;
+	int weaponsubtype;
+	int random_seed;
+	short mousedx;
+	short mousedy;
+	bool hasbeenpredicted;
 };
 
 #endif

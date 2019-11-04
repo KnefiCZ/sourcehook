@@ -114,12 +114,12 @@ enum TraceType_t
 struct Ray_t
 {
 	Ray_t() { }
-	VectorAligned  m_Start;
-	VectorAligned  m_Delta;
-	VectorAligned  m_StartOffset;
-	VectorAligned  m_Extents;
-	bool    m_IsRay;
-	bool    m_IsSwept;
+	VectorAligned m_Start;
+	VectorAligned m_Delta;
+	VectorAligned m_StartOffset;
+	VectorAligned m_Extents;
+	bool m_IsRay;
+	bool m_IsSwept;
 
 	void Init(const Vector& vecStart, Vector& vecEnd)
 	{

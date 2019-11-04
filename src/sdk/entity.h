@@ -89,14 +89,14 @@ public:
     inline type& name##() \
 	{ \
         static unsigned int offset_##name = g_pNetvar->GetOffset(table, netvar); \
-        return *(type*)((DWORD)this + offset_##name); \
+        return *(type*)((char*)this + offset_##name); \
     }
 
 #define PNETVAR(type, name, table, netvar) \
     inline type* name##() \
 	{ \
         static unsigned int offset_##name = g_pNetvar->GetOffset(table, netvar); \
-        return (type*)((DWORD)this + offset_##name); \
+        return (type*)((char*)this + offset_##name); \
     }
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -116,12 +116,12 @@ class CBaseEntity : IClientEntity
 public:
 	IClientRenderable* GetRenderable() const
 	{
-		return (IClientRenderable*)(this + 0x4);
+		return (IClientRenderable*)((char*)this + 0x4);
 	}
 
 	IClientNetworkable* GetNetworkable() const
 	{
-		return (IClientNetworkable*)(this + 0x8);
+		return (IClientNetworkable*)((char*)this + 0x8);
 	}
 public:
 	Vector& GetAbsOrigin()
@@ -145,9 +145,15 @@ public:
 	NETVAR(Vector, m_vecVelocity, "DT_BaseEntity", "m_vecVelocity[0]");
 };
 
+class CBaseAnimating : public CBaseEntity
+{
+public:
+	NETVAR(int, m_nHitboxSet, "DT_BaseAnimating", "m_nHitboxSet");
+};
+
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-class CBaseCombatWeapon : public CBaseEntity
+class CBaseCombatWeapon : public CBaseAnimating
 {
 public:
 	Vector& GetBulletSpread()
@@ -168,27 +174,32 @@ public:
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-class CBasePlayer : public CBaseEntity
+class CBasePlayer : public CBaseAnimating
 {
 public:
-	float ServerTime();
-	bool GetHitboxPos(int hitbox, Vector& pos);
 	bool IsAlive();
-	QAngle& ViewPunchAngle();
-	Vector GetEyePos();
 	void InvalidateBoneCache();
 public:
 	NETVAR(float, m_flSimulationTime, "DT_BaseEntity", "m_flSimulationTime");
-	NETVAR(int, m_nTickBase, "DT_LocalPlayerExclusive", "m_nTickBase");
 	NETVAR(int, m_iHealth, "DT_BaseEntity", "m_iHealth");
 	NETVAR(int, m_iTeamNum, "DT_BaseEntity", "m_iTeamNum");
 	NETVAR(CBaseHandle, m_hActiveWeapon, "DT_BaseCombatCharacter", "m_hActiveWeapon");
 	NETVAR(CBaseHandle, m_hObserverTarget, "DT_BasePlayer", "m_hObserverTarget");
 	NETVAR(CUtlFlags<int>, m_fFlags, "DT_BasePlayer", "m_fFlags");
 	NETVAR(int, m_lifeState, "DT_BasePlayer", "m_lifeState");
-	NETVAR(Vector, m_vecViewOffset, "DT_LocalPlayerExclusive", "m_vecViewOffset[0]");
 };
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+class CLocalPlayer : public CBasePlayer
+{
+public:
+	float ServerTime();
+	Vector EyePos();
+	QAngle& ViewPunchAngle();
+public:
+	NETVAR(int, m_nTickBase, "DT_LocalPlayerExclusive", "m_nTickBase");
+	NETVAR(Vector, m_vecViewOffset, "DT_LocalPlayerExclusive", "m_vecViewOffset[0]");
+};
 
 #endif

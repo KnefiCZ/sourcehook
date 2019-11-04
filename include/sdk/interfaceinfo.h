@@ -59,6 +59,8 @@
 
 /*--------------------------------IClientMode-----------------------------------*/
 #define ICLIENTMODE_INDEX_CREATEMOVE 21
+#define ICLIENTMODE_INDEX_LEVELINIT 22
+#define ICLIENTMODE_INDEX_LEVELSHUTDOWN 23
 /*------------------------------------------------------------------------------*/
 
 

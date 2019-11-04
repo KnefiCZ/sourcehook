@@ -2,8 +2,12 @@
 #include "sdk/math/mathlib.h"
 #include "../sdk/sdk.h"
 
-#define HITBOX_HEAD 0 // for testing
+void OyeBruh()
+{
 
+}
+
+/*
 bool CAimbot::RayTraceCheck(CBasePlayer* pOther, Vector& vecShootPos, int iHitbox)
 {
 	trace_t trace;
@@ -16,25 +20,28 @@ bool CAimbot::RayTraceCheck(CBasePlayer* pOther, Vector& vecShootPos, int iHitbo
 	ray.Init(g_pLocalPlayer->GetEyePos(), vecShootPos);
 	g_pEngineTrace->TraceRay(ray, MASK_SHOT, &filter, &trace);
 
-	return trace.m_pEnt == pOther || trace.fraction >= 0.98f;
+	return trace.m_pEnt == pOther || trace.fraction > 0.98f;
 }
 
-void CAimbot::FindBestTarget(CUserCmd* pCmd, Vector& vecShootPos)
+AimbotResult* CAimbot::FindBestTarget(CUserCmd* pCmd)
 {
-	CBasePlayer* pTarget = nullptr;
+	AimbotResult* pResult = new AimbotResult;
 
-	for (unsigned int i = 1; i <= g_pEngine->GetMaxClients(); i++)
+	for (int i = 1; i <= g_pEngine->GetMaxClients(); i++)
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(i);
-
-		if (!pPlayer)
-			continue;
-
+		
 		if (!pPlayer->IsAlive())
+		{
+			printf("%i not alive\n", i);
 			continue;
+		}
 
 		if (pPlayer == g_pLocalPlayer)
+		{
+			printf("%i is localplayer\n", i);
 			continue;
+		}
 
 		if (pPlayer->GetNetworkable()->IsDormant())
 		{
@@ -56,10 +63,9 @@ void CAimbot::FindBestTarget(CUserCmd* pCmd, Vector& vecShootPos)
 
 void CAimbot::Run(CUserCmd* pCmd)
 {
-	Vector vecShootPos;
-	FindBestTarget(pCmd, vecShootPos);
+	AimbotResult* pResult = FindBestTarget(pCmd);
 
-	if (m_pTarget)
+	if (pResult)
 	{
 		QAngle angAim;
 		Vector vecEyePos = g_pLocalPlayer->GetEyePos();
@@ -70,3 +76,4 @@ void CAimbot::Run(CUserCmd* pCmd)
 		pCmd->viewangles = angAim;
 	}
 }
+*/

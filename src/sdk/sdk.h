@@ -60,8 +60,8 @@ inline VMT* g_pClientModeVMT;
 
 
 /*======================LocalPlayer=========================*/
-class CBasePlayer;
-inline CBasePlayer* g_pLocalPlayer;
+class CLocalPlayer;
+inline CLocalPlayer* g_pLocalPlayer = nullptr;
 /*==========================================================*/
 
 
@@ -103,6 +103,7 @@ inline VMT* g_pDeviceVMT;
 /*======================CClientState========================*/
 #include "sdk/util/clientstate.h"
 inline CClientState* g_pClientState;
+inline VMT* g_pClientStateVMT;
 /*==========================================================*/
 
 

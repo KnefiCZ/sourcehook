@@ -53,7 +53,7 @@ vec_t DotProduct(const Vector& a, const vec_t *b);
 
 vec_t VectorLength(const Vector& v);
 
-void VectorNormalize(Vector& vec);
+vec_t VectorNormalize(Vector& vec);
 void VectorAdd(const Vector& a, const Vector& b, Vector& c);
 void VectorSubtract(const Vector& a, const Vector& b, Vector& c);
 void VectorMultiply(const Vector& a, vec_t b, Vector& c);
@@ -68,7 +68,9 @@ void VectorAngles(const Vector& forward, QAngle& angles);
 
 void NormalizeAngles(QAngle& angles);
 float GetFOV(const QAngle& viewAngle, const QAngle& aimAngle);
-QAngle CalcAngle(const Vector& src, const Vector& dst);
+
+void VectorToQAngle(const Vector& vec, QAngle& ang);
+void QAngleToVector(const QAngle& ang, Vector& vec);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 

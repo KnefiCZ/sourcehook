@@ -14,7 +14,7 @@ class CNospread
 	bool GetSpreadLUA(CBaseCombatWeapon* pWep, Vector& vecSpread);
 	bool FindBestMethod(Vector& vecSpread);
 public:
-	bool PredictSpread(CUserCmd* pCmd, QAngle& angRef);
+	bool PredictSpread(CUserCmd* pCmd);
 	void RemoveRecoil(CUserCmd* pCmd);
 };
 

@@ -1,5 +1,6 @@
 #include "sdk.h"
 #include "sdk/common.h"
+#include "sdk/interfaces/inetchannel.h"
 #include "sdk/util/console.h"
 #include "sdk/util/usercmd.h"
 #include "sdk/math/mathlib.h"
@@ -99,6 +100,7 @@ void SDK::Init()
 	printf("g_pGlobals: 0x%p\n", g_pGlobals);
 	printf("g_pClientMode: 0x%p\n", g_pClientMode);
 	printf("g_pClientState: 0x%p\n", g_pClientState);
+	printf("justcurious: 0x%p\n", g_pClientState->GetMessageHandler());
 	printf("g_pMoveHelper: 0x%p\n", g_pMoveHelper);
 	printf("g_pDevice: 0x%p\n", g_pDevice);
 	printf("g_pLuaShared: 0x%p\n", g_pLuaShared);
@@ -116,87 +118,115 @@ bool __fastcall HookCreateMove(IClientMode* thisptr, int, float flInputSampleTim
 		mov dwAddr, ebp
 	}
 
+	bool bSilent = true;
 	bool& bSendPacket = *(***(bool****)(dwAddr)-0x1);
 	bSendPacket = true;
 
-	if (g_pEngine->IsInGame() && g_pEngine->IsConnected())
-	{
-		g_pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	}
-	else
+	if (!g_pEngine->IsInGame() || !g_pEngine->IsConnected())
 		goto ORIGINAL;
 	
-	g_pEnginePred->Update();
-	g_pBhop->Run(pCmd);
+	g_pLocalPlayer = (CLocalPlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
 
-	if (pCmd->command_number != 0)
+	if (g_pLocalPlayer && g_pLocalPlayer->IsAlive())
 	{
-		g_pEnginePred->StartPrediction(pCmd);
+		g_pEnginePred->Update();
+		g_pNospread->RemoveRecoil(pCmd);
+		g_pBhop->Run(pCmd);
 
-		if (pCmd->buttons.IsFlagSet(IN_ATTACK))
+		if (pCmd->command_number != 0)
 		{
-			g_pAimbot->Run(pCmd);
+			g_pEnginePred->StartPrediction(pCmd);
 
-			if (g_pNospread->PredictSpread(pCmd, pCmd->viewangles))
-				g_pNospread->RemoveRecoil(pCmd);
+			if (pCmd->buttons.IsFlagSet(IN_ATTACK))
+			{
+				g_pNospread->PredictSpread(pCmd);
+				//printf("\nTickBase: %i\nTickcount: %i\nSimulation Time: %.4f\n", g_pLocalPlayer->m_nTickBase(), pCmd->tick_count, g_pLocalPlayer->m_flSimulationTime());
+			}
 
-			printf("->Ang: %.4f, %.4f, %.4f\n", pCmd->viewangles.x, pCmd->viewangles.y, pCmd->viewangles.z);
+			g_pEnginePred->EndPrediction(pCmd);
 		}
-
-		g_pEnginePred->EndPrediction(pCmd);
 	}
 	
-	goto ORIGINAL;
 ORIGINAL:
 	g_pClientModeVMT->GetOriginal<bool(__thiscall*)(void*, float, void*)>(ICLIENTMODE_INDEX_CREATEMOVE)(thisptr, flInputSampleTime, pCmd);
-	return false;
+	return !bSilent;
 };
+
+/*==============================================================================*/
+// LevelInit
+/*==============================================================================*/
+void __fastcall HookLevelInit(IClientMode* thisptr, int, const char* szMap)
+{
+	printf("map init\n");
+	return g_pClientModeVMT->GetOriginal<void(__thiscall*)(void*, const char*)>(ICLIENTMODE_INDEX_LEVELINIT)(thisptr, szMap);
+}
+
+/*==============================================================================*/
+// LevelShutdown
+/*==============================================================================*/
+void __fastcall HookLevelShutdown(IClientMode* thisptr, int)
+{
+	printf("map shutdown\n");
+	g_pLocalPlayer = nullptr;
+
+	return g_pClientModeVMT->GetOriginal<void(__thiscall*)(void*)>(ICLIENTMODE_INDEX_LEVELSHUTDOWN)(thisptr);
+}
+
+/*==============================================================================*/
+// ProcessTempEntities
+/*==============================================================================*/
+bool __fastcall HookProcessTempEntities(CClientState* thisptr, int edx, void* msg)
+{
+	return g_pClientStateVMT->GetOriginal<bool(__thiscall*)(void*, void*)>(24)(thisptr, msg);
+}
 
 /*==============================================================================*/
 // EndScene
 /*==============================================================================*/
-HRESULT WINAPI EndScene(IDirect3DDevice9* pDevice)
+HRESULT WINAPI HookEndScene(IDirect3DDevice9* pDevice)
 {
-	return g_pDeviceVMT->GetOriginal<decltype(&EndScene)>(IDIRECT3DDEVICE9_INDEX_ENDSCENE)(pDevice);
+	return g_pDeviceVMT->GetOriginal<decltype(&HookEndScene)>(IDIRECT3DDEVICE9_INDEX_ENDSCENE)(pDevice);
 }
 
 /*==============================================================================*/
 // Reset
 /*==============================================================================*/
-HRESULT WINAPI Reset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
+HRESULT WINAPI HookReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	HRESULT result = g_pDeviceVMT->GetOriginal<decltype(&Reset)>(IDIRECT3DDEVICE9_INDEX_RESET)(pDevice, pPresentationParameters);
-	
-
-
+	HRESULT result = g_pDeviceVMT->GetOriginal<decltype(&HookReset)>(IDIRECT3DDEVICE9_INDEX_RESET)(pDevice, pPresentationParameters);
 	return result;
 }
 
 /*==============================================================================*/
-//	Hooking SDK
+//	VMT Hooking
 /*==============================================================================*/
 void SDK::Hook()
 {
 	g_pClientModeVMT = new VMT(g_pClientMode);
 	g_pClientModeVMT->Hook(HookCreateMove, ICLIENTMODE_INDEX_CREATEMOVE);
+	g_pClientModeVMT->Hook(HookLevelInit, ICLIENTMODE_INDEX_LEVELINIT);
+	g_pClientModeVMT->Hook(HookLevelShutdown, ICLIENTMODE_INDEX_LEVELSHUTDOWN);
 	g_pClientModeVMT->Install();
 
 	g_pDeviceVMT = new VMT(g_pDevice);
-	g_pDeviceVMT->Hook(EndScene, IDIRECT3DDEVICE9_INDEX_ENDSCENE);
-	g_pDeviceVMT->Hook(Reset, IDIRECT3DDEVICE9_INDEX_RESET);
+	g_pDeviceVMT->Hook(HookEndScene, IDIRECT3DDEVICE9_INDEX_ENDSCENE);
+	g_pDeviceVMT->Hook(HookReset, IDIRECT3DDEVICE9_INDEX_RESET);
 	g_pDeviceVMT->Install();
+
+	g_pClientStateVMT = new VMT(g_pClientState->GetMessageHandler());
+	g_pClientStateVMT->Hook(HookProcessTempEntities, 24);
+	g_pClientStateVMT->Install();
 }
 
 /*==============================================================================*/
-//	Unlink & Unhook SDK
+//	Unhook SDK
 /*==============================================================================*/
 void SDK::Shutdown()
 {
 	g_pClientModeVMT->Uninstall();
+	g_pClientStateVMT->Uninstall();
 	g_pDeviceVMT->Uninstall();
 }
-
-
 
 /*==============================================================================*/
 //	Mathlib WorldToScreen

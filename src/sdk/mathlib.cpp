@@ -18,7 +18,15 @@
 /*==============================================================================*/
 float FastSqrt(float x)
 {
-	return sqrt(x);
+	float root = 0.f;
+
+	__asm
+	{
+		sqrtss xmm0, x
+		movss root, xmm0
+	}
+
+	return root;
 }
 
 void FastSinCos(float angle, float* s, float* c)
@@ -61,13 +69,16 @@ vec_t VectorLength(const Vector& v)
 	return FastSqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-void VectorNormalize(Vector& vec)
+vec_t VectorNormalize(Vector& vec)
 {
-	float iradius = 1.f / (FastSqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z) + FLT_EPSILON);
+	float flength = VectorLength(vec);
+	float iradius = 1.f / (flength + FLT_EPSILON);
 
 	vec.x *= iradius;
 	vec.y *= iradius;
 	vec.z *= iradius;
+
+	return flength;
 }
 
 void VectorAdd(const Vector& a, const Vector& b, Vector& c)
@@ -215,20 +226,18 @@ float GetFOV(const QAngle& viewAngle, const QAngle& aimAngle)
 	return RAD2DEG(acos(aim.Dot(ang) / aim.LengthSqr()));
 }
 
-QAngle CalcAngle(const Vector& src, const Vector& dst)
+void VectorToQAngle(const Vector& vec, QAngle& ang)
 {
-	QAngle vAngle;
-	Vector delta((src.x - dst.x), (src.y - dst.y), (src.z - dst.z));
-	double hyp = FastSqrt(delta.x * delta.x + delta.y * delta.y);
+	ang.x = vec.x;
+	ang.y = vec.y;
+	ang.z = vec.z;
+}
 
-	vAngle.x = float(atanf(float(delta.z / hyp)) * 57.295779513082f);
-	vAngle.y = float(atanf(float(delta.y / delta.x)) * 57.295779513082f);
-	vAngle.z = 0.0f;
-
-	if (delta.x >= 0.0)
-		vAngle.y += 180.0f;
-
-	return vAngle;
+void QAngleToVector(const QAngle& ang, Vector& vec)
+{
+	vec.x = ang.x;
+	vec.y = ang.y;
+	vec.z = ang.z;
 }
 
 
@@ -575,14 +584,18 @@ bool QAngle::operator!=(const QAngle& src) const
 
 QAngle& QAngle::operator+=(const QAngle& v)
 {
-	x += v.x; y += v.y; z += v.z;
+	x += v.x;
+	y += v.y; 
+	z += v.z;
 
 	return *this;
 }
 
 QAngle& QAngle::operator-=(const QAngle& v)
 {
-	x -= v.x; y -= v.y; z -= v.z;
+	x -= v.x;
+	y -= v.y;
+	z -= v.z;
 
 	return *this;
 }

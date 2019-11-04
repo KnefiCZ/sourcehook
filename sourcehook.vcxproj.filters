@@ -54,7 +54,7 @@
     <ClCompile Include="src\features\aimbot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\sdk\util\clientstate.h">
+    <ClCompile Include="src\sdk\hitboxmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -183,6 +183,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\glua.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\hitboxmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\util\clientstate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

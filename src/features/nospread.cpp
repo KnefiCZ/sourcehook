@@ -9,21 +9,22 @@
 
 bool CNospread::GetSpreadInternal(CBaseCombatWeapon* pWep, Vector& vecSpread)
 {
-	printf("doesnt use lua, spread on\n");
 	vecSpread = pWep->GetBulletSpread();
+
+	if (vecSpread.x == (float)VECTOR_CONE_15DEGREES)
+		return false;
+
 	return true;
 }
 
 bool CNospread::GetSpreadLUA(CBaseCombatWeapon* pWep, Vector& vecSpread)
 {
-	printf("uses lua, spread off\n");
 	return false;
 }
 
 bool CNospread::FindBestMethod(Vector& vecSpread)
 {
-	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	CBaseCombatWeapon* pWep = (CBaseCombatWeapon*)pLocalPlayer->m_hActiveWeapon().Get();
+	CBaseCombatWeapon* pWep = (CBaseCombatWeapon*)g_pLocalPlayer->m_hActiveWeapon().Get();
 
 	if (pWep->UsesLua())
 	{
@@ -35,7 +36,7 @@ bool CNospread::FindBestMethod(Vector& vecSpread)
 	}
 }
 
-bool CNospread::PredictSpread(CUserCmd* pCmd, QAngle& angRef)
+bool CNospread::PredictSpread(CUserCmd* pCmd)
 {
 	Vector vecSpread;
 	if (!FindBestMethod(vecSpread))
@@ -55,13 +56,23 @@ bool CNospread::PredictSpread(CUserCmd* pCmd, QAngle& angRef)
 	Vector vecDir = forward + (right * vecSpread.x * x) + (up * vecSpread.y * y);
 	VectorNormalize(vecDir);
 	
-	VectorAngles(vecDir, angRef);
-	NormalizeAngles(angRef);
+	VectorAngles(vecDir, pCmd->viewangles);
+	NormalizeAngles(pCmd->viewangles);
 	return true;
 }
 
 void CNospread::RemoveRecoil(CUserCmd* pCmd)
 {
-	CBasePlayer* pLocalPlayer = (CBasePlayer*)g_pEntityList->GetClientEntity(g_pEngine->GetLocalPlayer());
-	pCmd->viewangles -= pLocalPlayer->ViewPunchAngle();
+	Vector vecPunch;
+	QAngle angPunch;
+	QAngleToVector(g_pLocalPlayer->ViewPunchAngle(), vecPunch);
+
+	float fLength = VectorNormalize(vecPunch);
+	fLength = max(fLength - (10.f + fLength * 0.5f) * TICK_INTERVAL, 0.f);
+
+	vecPunch *= fLength;
+	vecPunch.z = 0.f;
+
+	VectorToQAngle(vecPunch, angPunch);
+	pCmd->viewangles -= angPunch;
 }

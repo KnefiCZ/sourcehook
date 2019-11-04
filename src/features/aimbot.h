@@ -5,14 +5,17 @@
 #include "../sdk/entity.h"
 #include "sdk/util/usercmd.h"
 
+struct AimbotResult
+{
+	CBasePlayer* m_pPlayer;
+	Vector m_vecShootPos;
+};
+
 class CAimbot
 {
-	CBasePlayer* m_pTarget = nullptr;
-
-	bool RayTraceCheck(CBasePlayer* pOther, Vector& vecShootPos, int iHitbox);
-	void FindBestTarget(CUserCmd* pCmd, Vector& vecShootPos);
+	//AimbotResult* FindBestTarget(CUserCmd* pCmd);
 public:
-	void Run(CUserCmd* pCmd);
+	//void Run(CUserCmd* pCmd);
 };
 
 inline CAimbot* g_pAimbot;

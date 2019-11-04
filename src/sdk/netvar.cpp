@@ -23,12 +23,12 @@ int CNetvarManager::GetOffset(const char* szTable, const char* szProp)
 	return m_TableProps[szTable]->m_Props[szProp]->m_Offset;
 }
 
-RecvProp* CNetvarManager::GetProp(const char * szTable, const char * szProp)
+RecvProp* CNetvarManager::GetProp(const char* szTable, const char* szProp)
 {
 	return m_TableProps[szTable]->m_Props[szProp];
 }
 
-void CNetvarManager::HookProp(const char * szTable, const char * szProp, RecvVarProxyFn pFn)
+void CNetvarManager::HookProp(const char* szTable, const char* szProp, RecvVarProxyFn pFn)
 {
 	RecvProp* pProperty = m_TableProps[szTable]->m_Props[szProp];
 	pProperty->SetProxyFn(pFn);
